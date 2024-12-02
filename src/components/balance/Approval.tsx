@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { supportedNetworks, BRIDGE_CONTRACT_ADDRESS } from './constants';
+import { supportedNetworks, BRIDGE_CONTRACT_ADDRESS } from '../../utils/constants';
 import { TextField, Button, Typography, Paper } from '@mui/material';
 
-const useApproval = (selectedChain, amount) => {
+const useApproval = (selectedChain: string, amount: string) => {
   const [approvalStatus, setApprovalStatus] = useState('not-started');
   const [approvedAmount, setApprovedAmount] = useState(0);
 
@@ -82,7 +82,7 @@ const useApproval = (selectedChain, amount) => {
   return { approvalStatus, approvedAmount: ethers.formatUnits(approvedAmount, 6), approve };
 };
 
-const Approval = ({ selectedChain, setApprovedAmountCallback }) => {
+const Approval = ({ selectedChain, setApprovedAmountCallback }: { selectedChain: string, setApprovedAmountCallback: (amount: string) => void }) => {
   const [localAmount, setLocalAmount] = useState('1');
   const { approvalStatus, approvedAmount, approve } = useApproval(selectedChain, localAmount);
 
@@ -90,9 +90,9 @@ const Approval = ({ selectedChain, setApprovedAmountCallback }) => {
     setApprovedAmountCallback(approvedAmount.toString());
   }, [approvedAmount, setApprovedAmountCallback]);
 
-  const handleAmountChange = (e) => {
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAmount = e.target.value;
-    if (newAmount >= 1) {
+    if (Number(newAmount) >= 1) {
       setLocalAmount(newAmount);
     }
   };
@@ -114,8 +114,9 @@ const Approval = ({ selectedChain, setApprovedAmountCallback }) => {
         color="primary"
         onClick={approve}
         fullWidth
+        disabled={approvalStatus === 'pending'}
       >
-        Approve
+        {approvalStatus === 'pending' ? 'Approving...' : 'Approve'}
       </Button>
     </Paper>
   );
