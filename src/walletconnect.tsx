@@ -24,24 +24,29 @@ const requiredNamespaces = {
   },
 };
 
+interface WalletConnectProps {
+  onBCHAddressChange: (address: string) => void;
+}
+
 // Create WalletConnect component to handle initialization
-export const WalletConnect = () => {
-  const [signClient, setSignClient] = useState(null);
+export const WalletConnect: React.FC<WalletConnectProps> = ({ onBCHAddressChange }) => {
+  const [signClient, setSignClient] = useState<SignClient | null>(null);
   const [lastSession, setLastSession] = useState(null);
-  const [walletConnectModal, setWalletConnectModal] = useState(null);
+  const [walletConnectModal, setWalletConnectModal] = useState<WalletConnectModal | null>(null);
   const [address, setAddress] = useState('');
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Setup WalletConnect client and event handlers on initial render
   useEffect(() => {
     const initWalletConnect = async () => {
       try {
+        setIsInitializing(true);
         // Initialize SignClient first
         const client = await SignClient.init({
           projectId: projectId,
           relayUrl: 'wss://relay.walletconnect.com',
           metadata: wcMetadata
         });
-        console.log("SignClient initialized:", client);
         setSignClient(client);
 
         // Initialize modal after SignClient
@@ -54,7 +59,6 @@ export const WalletConnect = () => {
           },
           explorerExcludedWalletIds: 'ALL',
         });
-        console.log("Modal initialized");
         setWalletConnectModal(modal);
 
         // Get last session
@@ -62,10 +66,11 @@ export const WalletConnect = () => {
         if (lastKeyIndex >= 0) {
           const session = client.session.getAll()[lastKeyIndex];
           setLastSession(session);
-          console.log("Found existing session:", session);
         }
       } catch (error) {
         console.error("Init error:", error);
+      } finally {
+        setIsInitializing(false);
       }
     };
 
@@ -141,19 +146,34 @@ export const WalletConnect = () => {
 
   const handleDisconnect = async () => {
     try {
-      if (lastSession) {
-        await signClient.disconnect({
-          topic: lastSession.topic,
-          reason: {
-            code: 6000,
-            message: "User disconnected"
+      if (lastSession && signClient) {
+        try {
+          await signClient.disconnect({
+            topic: lastSession.topic,
+            reason: {
+              code: 6000,
+              message: "User disconnected"
+            }
+          });
+        } catch (disconnectError) {
+          // If the error is "No matching key", the session is already gone
+          if (disconnectError.message.includes('No matching key')) {
+            console.log('Session already disconnected');
+          } else {
+            throw disconnectError; // Re-throw other errors
           }
-        });
+        }
+        // Always clean up the state, even if disconnect fails
         setLastSession(null);
         setAddress('');
+        onBCHAddressChange('');
       }
     } catch (error) {
       console.error("Disconnect error:", error);
+      // Clean up state even on error
+      setLastSession(null);
+      setAddress('');
+      onBCHAddressChange('');
     }
   };
 
@@ -177,12 +197,18 @@ export const WalletConnect = () => {
   };
 
   useEffect(() => {
-    if (lastSession) {
+    if (lastSession && signClient) {
       getUserAddress();
     } else {
       setAddress('');
     }
-  }, [lastSession]);
+  }, [lastSession, signClient]);
+
+  useEffect(() => {
+    if (address !== '') {
+      onBCHAddressChange(address);
+    }
+  }, [address]);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -191,44 +217,23 @@ export const WalletConnect = () => {
         <Button 
           variant="contained"
           onClick={handleConnect}
-          disabled={!signClient || !walletConnectModal}
-          sx={{ bgcolor: '#20c997', '&:hover': { bgcolor: '#18a47a' } }}
+          disabled={isInitializing}
+          fullWidth
         >
-          {!signClient || !walletConnectModal 
+          {isInitializing 
             ? "Initializing..."
             : "Connect BCH Wallet"}
         </Button>
       ) : (
-        // Connected state - shows address and disconnect button
-        <>
-          <Button 
-            variant="contained"
-            sx={{ 
-              bgcolor: '#198754', 
-              '&:hover': { bgcolor: '#157347' },
-              minWidth: 'fit-content'
-            }}
-          >
-            Connected
-          </Button>
-          <Typography variant="body2">
-            {address}
-          </Typography>
-          <Button 
-            variant="outlined"
-            onClick={handleDisconnect}
-            sx={{ 
-              color: '#dc3545', 
-              borderColor: '#dc3545',
-              '&:hover': { 
-                bgcolor: 'rgba(220, 53, 69, 0.04)',
-                borderColor: '#bb2d3b'
-              }
-            }}
-          >
-            Disconnect
-          </Button>
-        </>
+        // Connected state - only show disconnect button
+        <Button 
+          variant="outlined" 
+          color="error" 
+          onClick={handleDisconnect}
+          fullWidth
+        >
+          Disconnect BCH Wallet
+        </Button>
       )}
     </Box>
   );

@@ -12,7 +12,7 @@ import './App.css';
 
 const useWallet = () => {
   const [userEVMAddress, setUserEVMAddress] = useState('');
-  const [userBCHAddress, setUserBCHAddress] = useState('bitcoincash:qz6shwateymu3jm62sm47r6aw0u2dgrz3u73fpl667');
+  const [userBCHAddress, setUserBCHAddress] = useState('');
   const [network, setEVMNetwork] = useState('');
   const [depositTransactions, setDepositTransactions] = useState([]);
   const [withdrawalTransactions, setWithdrawalTransactions] = useState([]);
@@ -151,37 +151,89 @@ function App() {
     }
   };
 
+  const handleBCHAddressChange = (address: string) => {
+    setUserBCHAddress(address);
+  };
+
   return (
     <Container maxWidth="lg" style={{ padding: '2rem', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <AppBar position="static" style={{ marginBottom: '2rem', padding: 0 }}>
-        <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Grid container spacing={2} alignItems="center">
-            {userEVMAddress ? (
-              <Grid item>
-                <Typography variant="subtitle1" style={{ marginBottom: '0.5rem' }}>Network: {network}</Typography>
-                <Typography variant="subtitle1" style={{ marginBottom: '0.5rem' }}>{userEVMAddress}</Typography>
-              </Grid>
-            ) : (
-              <Grid item>
-                <Button color="inherit" onClick={connectWallet}>Connect Wallet</Button>
-              </Grid>
-            )}
-            {userBCHAddress && (
-              <Grid item>
-                <Typography variant="subtitle1" style={{ marginBottom: '0.5rem' }}>Network: Bitcoin Cash</Typography>
-                <Typography variant="subtitle1">BCH Address: {userBCHAddress}</Typography>
-              </Grid>
-            )}
-          </Grid>
-        </Toolbar>
-      </AppBar>
-      <WalletConnect />
-      {userEVMAddress && (
-          <Grid item>
-            <Button color="inherit" onClick={disconnectWallet}>Disconnect Wallet</Button>
-          </Grid>
-      )}
+      <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
+        Cross-Chain Bridge
+      </Typography>
 
+      {/* Wallet Connection Section */}
+      <Grid container spacing={4} sx={{ mb: 4 }}>
+        {/* EVM Network Connection Card */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 2 }}>
+              EVM Network Connection
+            </Typography>
+            
+            {userEVMAddress ? (
+              <Box>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <strong>Network:</strong> {network}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mb: 2, wordBreak: 'break-all' }}>
+                  <strong>Address:</strong> {userEVMAddress}
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={disconnectWallet}
+                  fullWidth
+                >
+                  Disconnect EVM Wallet
+                </Button>
+              </Box>
+            ) : (
+              <Box>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Connect your MetaMask or other EVM wallet to start bridging tokens
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  onClick={connectWallet}
+                  fullWidth
+                >
+                  Connect EVM Wallet
+                </Button>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* BCH Network Connection Card */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom color="secondary" sx={{ mb: 2 }}>
+              BCH Network Connection
+            </Typography>
+            
+            {userBCHAddress ? (
+              <Box>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <strong>Network:</strong> Bitcoin Cash
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mb: 2, wordBreak: 'break-all' }}>
+                  <strong>Address:</strong> {userBCHAddress}
+                </Typography>
+                <WalletConnect onBCHAddressChange={handleBCHAddressChange} />
+              </Box>
+            ) : (
+              <Box>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Connect your Bitcoin Cash wallet using WalletConnect
+                </Typography>
+                <WalletConnect onBCHAddressChange={handleBCHAddressChange} />
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Bridge Interface */}
       <Grid container spacing={3} mb={2}>
         <Grid item xs={12} md={6}>
           <Paper elevation={3} style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
