@@ -157,7 +157,7 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
                     variant="contained"
                     color="primary"
                     onClick={bridge}
-                    disabled={!selectedChain || !activeTransaction.amount || activeTransaction.amount < 1 || activeTransaction.amount > 10000 || bridgeStatus === 'pending' || !activeTransaction.bchAddress}
+                    disabled={!selectedChain || !activeTransaction.amount || parseFloat(activeTransaction?.amount) < 1 || parseFloat(activeTransaction?.amount) > 10000 || bridgeStatus === 'pending' || !activeTransaction.bchAddress}
                     fullWidth
                   >
                     {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge wUSDT'}

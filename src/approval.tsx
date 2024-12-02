@@ -71,7 +71,7 @@ const useApproval = (selectedChain, amount) => {
 
       await approveTx.wait();
       setApprovalStatus('approved');
-      setApprovedAmount(amountToApprove);
+      setApprovedAmount(Number(amountToApprove));
     } catch (error) {
       console.error('Approval error:', error);
       setApprovalStatus('not-started');

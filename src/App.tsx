@@ -7,6 +7,7 @@ import { Withdraw } from './withdraw';
 import Approval from './approval';
 import Transactions from './transactions';
 import { useUSDTBalance } from './balance';
+import { WalletConnect } from './walletconnect';
 import './App.css';
 
 const useWallet = () => {
@@ -174,6 +175,7 @@ function App() {
           </Grid>
         </Toolbar>
       </AppBar>
+      <WalletConnect />
       {userEVMAddress && (
           <Grid item>
             <Button color="inherit" onClick={disconnectWallet}>Disconnect Wallet</Button>
@@ -226,7 +228,7 @@ function App() {
               transaction={activeDepositTransaction}
             />
             <Box mt={3}>
-              <Transactions address={userEVMAddress} transactions={depositTransactions} type="Deposit" onTransactionButtonClick={handleTransactionButtonClick} />
+              <Transactions transactions={depositTransactions} type="Deposit" onTransactionButtonClick={handleTransactionButtonClick} />
             </Box>
           </>
         ) : (
@@ -236,7 +238,7 @@ function App() {
               transaction={activeWithdrawTransaction}
             />
             <Box mt={3}>
-              <Transactions address={userEVMAddress} transactions={withdrawalTransactions} type="Withdrawal" onTransactionButtonClick={handleTransactionButtonClick}/>
+              <Transactions transactions={withdrawalTransactions} type="Withdrawal" onTransactionButtonClick={handleTransactionButtonClick}/>
             </Box>
           </>
         )}
