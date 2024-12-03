@@ -3,31 +3,38 @@ import { Deposit } from './operations/Deposit';
 import { Withdraw } from './operations/Withdraw';
 import Transactions from './transactions/Transactions';
 import { Transaction } from '../../types';
+import { BalanceDisplay } from './BalanceDisplay';
 
 interface BridgeInterfaceProps {
   direction: 'toBCH' | 'toEVM';
   setDirection: (direction: 'toBCH' | 'toEVM') => void;
   selectedChain: string;
-  approvedAmount: string;
-  activeDepositTransaction: Transaction;
-  activeWithdrawTransaction: Transaction;
+  activeDepositTransaction: Transaction | null;
+  activeWithdrawTransaction: Transaction | null;
   depositTransactions: Transaction[];
   withdrawalTransactions: Transaction[];
   onTransactionButtonClick: (transaction: Transaction) => void;
   onReset: () => void;
+  usdtBalance: string;
+  amount: string;
+  needsApproval: boolean;
+  setNeedsApproval: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const BridgeInterface = ({
   direction,
   setDirection,
   selectedChain,
-  approvedAmount,
   activeDepositTransaction,
   activeWithdrawTransaction,
   depositTransactions,
   withdrawalTransactions,
   onTransactionButtonClick,
-  onReset
+  onReset,
+  usdtBalance,
+  amount,
+  needsApproval,
+  setNeedsApproval
 }: BridgeInterfaceProps) => {
   return (
     <Paper elevation={3} style={{ padding: '2rem', marginBottom: '2rem' }}>
@@ -57,11 +64,18 @@ export const BridgeInterface = ({
         </Button>
       </Box>
 
+      <BalanceDisplay 
+        usdtBalance={usdtBalance}
+        selectedChain={selectedChain}
+        amount={amount}
+        onApprovalComplete={() => setNeedsApproval(false)}
+        needsApproval={needsApproval}
+      />
+
       {direction === 'toBCH' ? (
         <>
           <Deposit 
             selectedChain={selectedChain}
-            approvedAmount={approvedAmount}
             transaction={activeDepositTransaction}
           />
           <Box mt={3}>

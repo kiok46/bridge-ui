@@ -7,18 +7,35 @@ import { SUPPORTED_NETWORKS } from '../config/networks';
 export class ContractService {
   private provider: ethers.BrowserProvider;
   private signer: ethers.Signer | null = null;
+  private usdtContract: ethers.Contract | null = null;
   private network: string;
 
   constructor(network: string) {
-    if (!window.ethereum) {
-      throw new Error('No ethereum provider found');
-    }
-    this.provider = new ethers.BrowserProvider(window.ethereum);
     this.network = network;
+    this.provider = new ethers.BrowserProvider(window.ethereum);
   }
 
   async connect() {
-    this.signer = await this.provider.getSigner();
+    if (!this.signer) {
+      this.signer = await this.provider.getSigner();
+      const usdtAddress = SUPPORTED_NETWORKS[this.network].contracts.USDT;
+      this.usdtContract = new ethers.Contract(usdtAddress, USDT_ABI, this.signer);
+    }
+    return this.signer;
+  }
+
+  async getAllowance(owner: string, spender: string): Promise<bigint> {
+    if (!this.usdtContract) {
+      await this.connect();
+    }
+    return this.usdtContract!.allowance(owner, spender);
+  }
+
+  async approveToken(spender: string, amount: bigint): Promise<ethers.ContractTransactionResponse> {
+    if (!this.usdtContract) {
+      await this.connect();
+    }
+    return this.usdtContract!.approve(spender, amount);
   }
 
   async getUSDTContract(): Promise<USDTContract> {

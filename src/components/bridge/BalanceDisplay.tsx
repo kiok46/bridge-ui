@@ -1,30 +1,38 @@
-import { Grid, Paper, Typography } from '@mui/material';
-import Approval from '../balance/Approval';
+import { Grid } from '@mui/material';
+import { TokenBalance } from '../balance/TokenBalance';
+import { Approval } from '../balance/Approval';
 
 interface BalanceDisplayProps {
   usdtBalance: string;
   selectedChain: string;
-  setApprovedAmountCallback: (amount: string) => void;
+  amount: string;
+  onApprovalComplete: () => void;
+  needsApproval: boolean;
 }
 
 export const BalanceDisplay = ({ 
   usdtBalance, 
-  selectedChain, 
-  setApprovedAmountCallback 
+  selectedChain,
+  amount,
+  onApprovalComplete,
+  needsApproval
 }: BalanceDisplayProps) => {
   return (
     <Grid container spacing={3} mb={2}>
-      <Grid item xs={12} md={6}>
-        <Paper elevation={3} style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography variant="h6">Wrapped USDT on BCH: {usdtBalance}</Typography>
-        </Paper>
+      <Grid item xs={12}>
+        <TokenBalance usdtBalance={usdtBalance} />
       </Grid>
-      <Grid item xs={12} md={6}>
-        <Approval 
-          selectedChain={selectedChain} 
-          setApprovedAmountCallback={setApprovedAmountCallback} 
-        />
-      </Grid>
+      {needsApproval && (
+        <Grid item xs={12}>
+          <Approval 
+            selectedChain={selectedChain}
+            amount={amount}
+            onApprovalComplete={onApprovalComplete}
+          />
+        </Grid>
+      )}
     </Grid>
   );
-}; 
+};
+
+export default BalanceDisplay; 

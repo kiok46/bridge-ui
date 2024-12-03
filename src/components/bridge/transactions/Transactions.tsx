@@ -1,4 +1,4 @@
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Paper } from '@mui/material';
 import { Transaction } from '../../../types';
 import { shortenAddress } from '../../../utils/helpers';
 
@@ -8,6 +8,42 @@ interface TransactionsProps {
   onTransactionButtonClick: (transaction: Transaction) => void;
   loading?: boolean;
 }
+
+const TransactionDetails = ({ transaction }: { transaction: Transaction }) => (
+  <Box mt={1}>
+    <Typography variant="body2" color="textSecondary">
+      Tx: {shortenAddress(transaction.transactionHash)}
+    </Typography>
+    <Typography variant="body2" color="textSecondary">
+      Amount: {transaction.amount} USDT
+    </Typography>
+    <Typography variant="caption" color="textSecondary">
+      Block: {transaction.blockNumber}
+    </Typography>
+  </Box>
+);
+
+const TransactionCard = ({ 
+  transaction, 
+  onTransactionButtonClick 
+}: { 
+  transaction: Transaction;
+  onTransactionButtonClick: (transaction: Transaction) => void;
+}) => (
+  <Paper elevation={3} sx={{ mb: 2, p: 2 }}>
+    <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+      <TransactionDetails transaction={transaction} />
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={() => onTransactionButtonClick(transaction)}
+        sx={{ ml: 2 }}
+      >
+        View
+      </Button>
+    </Box>
+  </Paper>
+);
 
 const Transactions = ({ transactions, type, onTransactionButtonClick, loading = false }: TransactionsProps) => {
   if (loading) {
@@ -34,32 +70,11 @@ const Transactions = ({ transactions, type, onTransactionButtonClick, loading = 
         {type} Transactions
       </Typography>
       {transactions.map((transaction) => (
-        <Button
+        <TransactionCard
           key={transaction.id}
-          variant="outlined"
-          onClick={() => onTransactionButtonClick(transaction)}
-          fullWidth
-          sx={{ 
-            mb: 1,
-            justifyContent: 'space-between',
-            textAlign: 'left',
-            p: 2
-          }}
-        >
-          <Box>
-            <Typography variant="subtitle2">
-              Tx: {shortenAddress(transaction.transactionHash)}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Amount: {transaction.amount} USDT
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="textSecondary">
-              {transaction.blockNumber}
-            </Typography>
-          </Box>
-        </Button>
+          transaction={transaction}
+          onTransactionButtonClick={onTransactionButtonClick}
+        />
       ))}
     </Box>
   );

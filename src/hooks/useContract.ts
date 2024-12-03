@@ -1,32 +1,35 @@
 import { useState } from 'react';
 import { ContractService } from '../services/contractService';
-import { useNotification } from '../contexts/NotificationContext';
+import { useNotificationHandlers } from './useNotificationContext';
+import { useWalletContext } from './useWalletContext';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../utils/constants';
 import { parseAmount } from '../utils/helpers';
 
 export const useContract = (network: string) => {
   const [loading, setLoading] = useState(false);
-  const { showNotification } = useNotification();
+  const { showSuccess, showError } = useNotificationHandlers();
+  const { isEVMConnected } = useWalletContext();
   const contractService = new ContractService(network);
 
   const handleError = (error: any, message: string) => {
     console.error(message, error);
-    showNotification({
-      type: 'error',
-      message: error.message || message
-    });
+    showError(error.message || message);
+  };
+
+  const ensureWalletConnected = () => {
+    if (!isEVMConnected) {
+      throw new Error('Please connect your wallet first');
+    }
   };
 
   const approve = async (amount: string) => {
     setLoading(true);
     try {
+      ensureWalletConnected();
       await contractService.connect();
       const tx = await contractService.approveUSDT(parseAmount(amount));
       await tx.wait();
-      showNotification({
-        type: 'success',
-        message: SUCCESS_MESSAGES.APPROVAL_SUCCESS
-      });
+      showSuccess(SUCCESS_MESSAGES.APPROVAL_SUCCESS);
       return true;
     } catch (error) {
       handleError(error, ERROR_MESSAGES.APPROVAL_FAILED);
@@ -39,13 +42,11 @@ export const useContract = (network: string) => {
   const deposit = async (amount: string) => {
     setLoading(true);
     try {
+      ensureWalletConnected();
       await contractService.connect();
       const tx = await contractService.depositUSDT(parseAmount(amount));
       await tx.wait();
-      showNotification({
-        type: 'success',
-        message: SUCCESS_MESSAGES.DEPOSIT_SUCCESS
-      });
+      showSuccess(SUCCESS_MESSAGES.DEPOSIT_SUCCESS);
       return true;
     } catch (error) {
       handleError(error, ERROR_MESSAGES.DEPOSIT_FAILED);
@@ -58,13 +59,11 @@ export const useContract = (network: string) => {
   const withdraw = async (amount: string) => {
     setLoading(true);
     try {
+      ensureWalletConnected();
       await contractService.connect();
       const tx = await contractService.withdrawUSDT(parseAmount(amount));
       await tx.wait();
-      showNotification({
-        type: 'success',
-        message: SUCCESS_MESSAGES.WITHDRAW_SUCCESS
-      });
+      showSuccess(SUCCESS_MESSAGES.WITHDRAW_SUCCESS);
       return true;
     } catch (error) {
       handleError(error, ERROR_MESSAGES.WITHDRAW_FAILED);
@@ -75,6 +74,7 @@ export const useContract = (network: string) => {
   };
 
   return {
+    usdtContract: contractService,
     loading,
     approve,
     deposit,

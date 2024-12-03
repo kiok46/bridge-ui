@@ -1,29 +1,30 @@
 import { Button } from '@mui/material';
+import { themeConstants } from '../../theme/constants';
 
 interface WalletConnectProps {
-  onBCHAddressChange: (address: string) => void;
+  onConnect: () => Promise<void>;
 }
 
-export const WalletConnect = ({ onBCHAddressChange }: WalletConnectProps) => {
-  const handleConnect = async () => {
-    try {
-      // Implement your BCH wallet connection logic here
-      // This is a placeholder - replace with actual wallet connection
-      const mockAddress = 'bitcoincash:qzxcvbnm...';
-      onBCHAddressChange(mockAddress);
-    } catch (error) {
-      console.error('Error connecting BCH wallet:', error);
-    }
-  };
-
+export const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   return (
-    <Button 
-      variant="contained" 
-      color="secondary" 
-      onClick={handleConnect}
+    <Button
+      onClick={onConnect}
       fullWidth
+      sx={{
+        background: themeConstants.colors.primary.gradient,
+        color: '#FFFFFF',
+        textTransform: 'none',
+        borderRadius: themeConstants.borderRadius.medium,
+        padding: '10px',
+        fontFamily: themeConstants.typography.fontFamily,
+        fontWeight: 500,
+        '&:hover': {
+          background: themeConstants.colors.primary.gradientHover,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        }
+      }}
     >
-      Connect BCH Wallet
+      Connect with WalletConnect
     </Button>
   );
 }; 

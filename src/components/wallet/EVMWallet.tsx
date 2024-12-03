@@ -1,50 +1,116 @@
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
+import { WalletConnect } from './WalletConnect';
+import { useWalletContext } from '../../hooks/useWalletContext';
+import { themeConstants } from '../../theme/constants';
 
-interface EVMWalletProps {
-  network: string;
-  userEVMAddress: string;
-  onConnect: () => void;
-  onDisconnect: () => void;
-}
+export const EVMWallet = () => {
+  const { userEVMAddress, disconnectEVM, evmNetwork, connectEVM } = useWalletContext();
 
-export const EVMWallet = ({ network, userEVMAddress, onConnect, onDisconnect }: EVMWalletProps) => {
   return (
-    <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
-      <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 2 }}>
+    <Stack spacing={2}>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          color: themeConstants.colors.text.primary,
+          fontSize: '1.1rem',
+          fontFamily: themeConstants.typography.fontFamily,
+          mb: 1
+        }}
+      >
         EVM Network Connection
       </Typography>
-      
+
       {userEVMAddress ? (
         <Box>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            <strong>Network:</strong> {network}
-          </Typography>
-          <Typography variant="subtitle1" sx={{ mb: 2, wordBreak: 'break-all' }}>
-            <strong>Address:</strong> {userEVMAddress}
-          </Typography>
-          <Button 
-            variant="outlined" 
-            color="error" 
-            onClick={onDisconnect}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2
+            }}
+          >
+            <Typography
+              sx={{
+                color: themeConstants.colors.text.secondary,
+                fontSize: '0.875rem',
+                fontFamily: themeConstants.typography.fontFamily
+              }}
+            >
+              Network
+            </Typography>
+            <Typography
+              sx={{
+                color: themeConstants.colors.text.primary,
+                fontSize: '0.875rem',
+                fontFamily: themeConstants.typography.fontFamily,
+                background: 'rgba(21, 126, 255, 0.05)',
+                padding: '4px 8px',
+                borderRadius: themeConstants.borderRadius.small,
+                border: '1px solid rgba(21, 126, 255, 0.2)',
+              }}
+            >
+              {evmNetwork}
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2
+            }}
+          >
+            <Typography
+              sx={{
+                color: themeConstants.colors.text.secondary,
+                fontSize: '0.875rem',
+                fontFamily: themeConstants.typography.fontFamily
+              }}
+            >
+              Connected Address
+            </Typography>
+            <Typography
+              sx={{
+                color: themeConstants.colors.text.primary,
+                fontSize: '0.875rem',
+                fontFamily: themeConstants.typography.fontFamily,
+                background: 'rgba(21, 126, 255, 0.05)',
+                padding: '4px 8px',
+                borderRadius: themeConstants.borderRadius.small,
+                border: '1px solid rgba(21, 126, 255, 0.2)',
+              }}
+            >
+              {userEVMAddress.slice(0, 6)}...{userEVMAddress.slice(-4)}
+            </Typography>
+          </Box>
+          
+          <Button
+            onClick={disconnectEVM}
             fullWidth
+            sx={{
+              background: themeConstants.colors.background.button,
+              color: themeConstants.colors.error.main,
+              textTransform: 'none',
+              borderRadius: themeConstants.borderRadius.medium,
+              padding: '10px',
+              border: `1px solid ${themeConstants.colors.error.light}`,
+              fontFamily: themeConstants.typography.fontFamily,
+              fontWeight: 500,
+              '&:hover': {
+                background: 'rgba(255, 67, 67, 0.1)',
+                border: '1px solid rgba(255, 67, 67, 0.3)',
+              }
+            }}
           >
             Disconnect EVM Wallet
           </Button>
         </Box>
       ) : (
-        <Box>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Connect your MetaMask or other EVM wallet to start bridging tokens
-          </Typography>
-          <Button 
-            variant="contained" 
-            onClick={onConnect}
-            fullWidth
-          >
-            Connect EVM Wallet
-          </Button>
-        </Box>
+        <WalletConnect onConnect={connectEVM} />
       )}
-    </Paper>
+    </Stack>
   );
 }; 

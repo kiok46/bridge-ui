@@ -1,48 +1,98 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Alert, Snackbar } from '@mui/material';
 
-interface Notification {
+type NotificationType = 'success' | 'error' | 'info' | 'warning';
+
+interface NotificationState {
   message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: NotificationType;
+  open: boolean;
 }
 
-interface NotificationContextType {
-  showNotification: (notification: Notification) => void;
+interface NotificationContextValue {
+  showNotification: (message: string, type: NotificationType) => void;
+  hideNotification: () => void;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const initialState: NotificationState = {
+  message: '',
+  type: 'info',
+  open: false
+};
 
-export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [notification, setNotification] = useState<Notification | null>(null);
-  const [open, setOpen] = useState(false);
+export const NotificationContext = createContext<NotificationContextValue | undefined>(undefined);
 
-  const showNotification = (newNotification: Notification) => {
-    setNotification(newNotification);
-    setOpen(true);
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<NotificationState>(initialState);
+
+  const showNotification = useCallback((message: string, type: NotificationType) => {
+    setState({
+      message,
+      type,
+      open: true
+    });
+  }, []);
+
+  const hideNotification = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      open: false
+    }));
+  }, []);
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    hideNotification();
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const contextValue = React.useMemo(
+    () => ({
+      showNotification,
+      hideNotification
+    }),
+    [showNotification, hideNotification]
+  );
 
   return (
-    <NotificationContext.Provider value={{ showNotification }}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
-      {notification && (
-        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-          <Alert onClose={handleClose} severity={notification.type} sx={{ width: '100%' }}>
-            {notification.message}
-          </Alert>
-        </Snackbar>
-      )}
+      <Snackbar
+        open={state.open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={state.type}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {state.message}
+        </Alert>
+      </Snackbar>
     </NotificationContext.Provider>
   );
 };
 
-export const useNotification = () => {
+export const useNotification = (): NotificationContextValue => {
   const context = useContext(NotificationContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useNotification must be used within a NotificationProvider');
   }
   return context;
+};
+
+// Helper hook for common notification patterns
+export const useNotificationHandlers = () => {
+  const { showNotification } = useNotification();
+
+  return {
+    showSuccess: (message: string) => showNotification(message, 'success'),
+    showError: (message: string) => showNotification(message, 'error'),
+    showInfo: (message: string) => showNotification(message, 'info'),
+    showWarning: (message: string) => showNotification(message, 'warning'),
+  };
 }; 
