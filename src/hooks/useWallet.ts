@@ -62,37 +62,3 @@ export const useEVMWallet = () => {
     disconnectWallet
   };
 };
-
-const connectBCHWallet = async (): Promise<string> => {
-  // This is a mock implementation
-  // Replace this with your actual WalletConnect integration
-  return new Promise((resolve) => {
-    // Simulating a wallet connection
-    setTimeout(() => {
-      resolve('bitcoincash:qz6shwateymu3jm62sm47r6aw0u2dgrz3u73fpl667');
-    }, 500);
-  });
-};
-
-export const useBCHWallet = () => {
-  const [userBCHAddress, setUserBCHAddress] = useState('');
-
-  const handleWalletConnect = useCallback(async () => {
-    try {
-      const address = await connectBCHWallet();
-      setUserBCHAddress(address);
-    } catch (error) {
-      console.error('Error connecting BCH wallet:', error);
-    }
-  }, []);
-
-  const disconnectWallet = useCallback(() => {
-    setUserBCHAddress('');
-  }, []);
-
-  return {
-    userBCHAddress,
-    connectWallet: handleWalletConnect,
-    disconnectWallet
-  };
-}; 

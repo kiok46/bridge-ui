@@ -1,10 +1,15 @@
-import { Box, Typography, Button, Stack } from '@mui/material';
-import { WalletConnect } from './WalletConnect';
-import { useBCHWallet } from '../../hooks/useWallet';
+import { Box, Typography, Stack } from '@mui/material';
 import { themeConstants } from '../../theme/constants';
+import { useWalletConnectBCH } from '../../hooks/useWalletConnectBCH';
+import { ConnectButton } from '../ConnectButton';
 
 export const BCHWallet = () => {
-  const { userBCHAddress, connectWallet, disconnectWallet } = useBCHWallet();
+  const { 
+    address, 
+    isInitializing, 
+    connect, 
+    disconnect 
+  } = useWalletConnectBCH();
 
   return (
     <Stack spacing={2}>
@@ -21,7 +26,7 @@ export const BCHWallet = () => {
         Bitcoin Cash Wallet
       </Typography>
 
-      {userBCHAddress ? (
+      {address ? (
         <Box>
           <Box
             sx={{
@@ -84,30 +89,15 @@ export const BCHWallet = () => {
                 wordBreak: 'break-all'
               }}
             >
-              {userBCHAddress}
+              {address}
             </Typography>
           </Box>
           
-          <Button
-            onClick={disconnectWallet}
-            fullWidth
-            sx={{
-              background: themeConstants.colors.background.button,
-              color: themeConstants.colors.error.main,
-              textTransform: 'none',
-              borderRadius: themeConstants.borderRadius.medium,
-              padding: '10px',
-              border: `1px solid ${themeConstants.colors.error.light}`,
-              fontFamily: themeConstants.typography.fontFamily,
-              fontWeight: 500,
-              '&:hover': {
-                background: 'rgba(255, 67, 67, 0.1)',
-                border: '1px solid rgba(255, 67, 67, 0.3)',
-              }
-            }}
+          <ConnectButton
+            onClick={disconnect}
           >
             Disconnect BCH Wallet
-          </Button>
+          </ConnectButton>
         </Box>
       ) : (
         <Box>
@@ -121,7 +111,15 @@ export const BCHWallet = () => {
           >
             Connect your Bitcoin Cash wallet using WalletConnect
           </Typography>
-          <WalletConnect onConnect={connectWallet} />
+          <ConnectButton 
+            onClick={connect}
+            disabled={isInitializing}
+            fullWidth
+          >
+            {isInitializing 
+              ? "Initializing..."
+              : "Connect to BCH Network"}
+          </ConnectButton>
         </Box>
       )}
     </Stack>

@@ -1,10 +1,10 @@
-import { Box, Typography, Button, Stack } from '@mui/material';
-import { WalletConnect } from './WalletConnect';
-import { useWalletContext } from '../../hooks/useWalletContext';
+import { Box, Typography, Stack, Button } from '@mui/material';
+import { ConnectButton } from '../ConnectButton';
 import { themeConstants } from '../../theme/constants';
+import { useWalletConnectEVM } from '../../hooks/useWalletConnectEVM';
 
 export const EVMWallet = () => {
-  const { userEVMAddress, disconnectEVM, evmNetwork, connectEVM } = useWalletContext();
+  const { address, disconnect, network, connect, isInitializing } = useWalletConnectEVM();
 
   return (
     <Stack spacing={2}>
@@ -18,10 +18,10 @@ export const EVMWallet = () => {
           mb: 1
         }}
       >
-        EVM Network Connection
+        EVM Wallet
       </Typography>
 
-      {userEVMAddress ? (
+      {address ? (
         <Box>
           <Box
             sx={{
@@ -51,7 +51,7 @@ export const EVMWallet = () => {
                 border: '1px solid rgba(21, 126, 255, 0.2)',
               }}
             >
-              {evmNetwork}
+              {network}
             </Typography>
           </Box>
 
@@ -81,35 +81,42 @@ export const EVMWallet = () => {
                 padding: '4px 8px',
                 borderRadius: themeConstants.borderRadius.small,
                 border: '1px solid rgba(21, 126, 255, 0.2)',
+                wordBreak: 'break-all'
               }}
             >
-              {userEVMAddress.slice(0, 6)}...{userEVMAddress.slice(-4)}
+              {address}
             </Typography>
           </Box>
           
-          <Button
-            onClick={disconnectEVM}
+          <ConnectButton
+            onClick={disconnect}
             fullWidth
-            sx={{
-              background: themeConstants.colors.background.button,
-              color: themeConstants.colors.error.main,
-              textTransform: 'none',
-              borderRadius: themeConstants.borderRadius.medium,
-              padding: '10px',
-              border: `1px solid ${themeConstants.colors.error.light}`,
-              fontFamily: themeConstants.typography.fontFamily,
-              fontWeight: 500,
-              '&:hover': {
-                background: 'rgba(255, 67, 67, 0.1)',
-                border: '1px solid rgba(255, 67, 67, 0.3)',
-              }
-            }}
           >
             Disconnect EVM Wallet
-          </Button>
+          </ConnectButton>
         </Box>
       ) : (
-        <WalletConnect onConnect={connectEVM} />
+        <Box>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mb: 2,
+              color: themeConstants.colors.text.secondary,
+              fontFamily: themeConstants.typography.fontFamily
+            }}
+          >
+            Connect your EVM wallet using WalletConnect
+          </Typography>
+          <ConnectButton 
+            onClick={connect}
+            disabled={isInitializing}
+            fullWidth
+          >
+            {isInitializing 
+              ? "Initializing..."
+              : "Connect to EVM Network"}
+          </ConnectButton>
+        </Box>
       )}
     </Stack>
   );

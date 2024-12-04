@@ -29,7 +29,7 @@ interface WalletConnectProps {
 }
 
 // Create WalletConnect component to handle initialization
-export const WalletConnect: React.FC<WalletConnectProps> = ({ onBCHAddressChange }) => {
+export const WalletConnectBCH: React.FC<WalletConnectProps> = ({ onBCHAddressChange }) => {
   const [signClient, setSignClient] = useState<SignClient | null>(null);
   const [lastSession, setLastSession] = useState(null);
   const [walletConnectModal, setWalletConnectModal] = useState<WalletConnectModal | null>(null);
@@ -113,7 +113,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ onBCHAddressChange
             chains: [connectedChain],
             methods: ['bch_getAddresses', 'bch_signTransaction', 'bch_signMessage'],
             events: ['addressesChanged'],
-          }
+          },
         }
       });
 
@@ -189,6 +189,8 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ onBCHAddressChange
           params: {},
         },
       });
+
+      console.log("Got address:", result);
       setAddress(result[0]);
     } catch (error) {
       console.error("Error getting address:", error);
@@ -225,15 +227,19 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ onBCHAddressChange
             : "Connect BCH Wallet"}
         </Button>
       ) : (
-        // Connected state - only show disconnect button
+        <>
+          <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>
+            {address}
+        </Typography>
         <Button 
           variant="outlined" 
           color="error" 
           onClick={handleDisconnect}
-          fullWidth
-        >
-          Disconnect BCH Wallet
-        </Button>
+            fullWidth
+          >
+            Disconnect BCH Wallet
+          </Button>
+        </>
       )}
     </Box>
   );

@@ -1,34 +1,38 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { getUSDTContract } from '../services/contracts';
+import { supportedNetworks, BRIDGE_CONTRACT_ADDRESS } from '../utils/constants';
 
-export const useUSDTBalance = (address?: string, chainId?: string) => {
-  const [balance, setBalance] = useState('0');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+export const useUSDTBalance = (selectedChain?: string) => {
+  const [usdtBalance, setUsdtBalance] = useState('0');
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!window.ethereum || !address || !chainId) {
-        setLoading(false);
+  const fetchUSDTBalance = async () => {
+    try {
+      if (!window.ethereum) {
+        alert('Please install MetaMask!');
         return;
       }
 
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const contract = await getUSDTContract(chainId, provider);
-        const balance = await contract.balanceOf(address);
-        setBalance(ethers.formatUnits(balance, 6));
-      } catch (err: any) {
-        console.error('Error fetching USDT balance:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      const tokenAbi = ["function balanceOf(address account) public view returns (uint256)"];
+      const tokenContract = new ethers.Contract(
+        supportedNetworks.find(net => net.network === 'sepolia').usdtAddress, 
+        tokenAbi, 
+        signer
+      );
+      
+      const balance = await tokenContract.balanceOf(BRIDGE_CONTRACT_ADDRESS);
+      setUsdtBalance(ethers.formatUnits(balance, 6));
+    } catch (error) {
+      console.error('Error fetching USDT balance:', error);
+      alert('Error fetching USDT balance: ' + error.message);
+    }
+  };
 
-    fetchBalance();
-  }, [address, chainId]);
+  useEffect(() => {
+    fetchUSDTBalance();
+  }, []);
 
-  return { balance, loading, error };
+  return usdtBalance;
 }; 

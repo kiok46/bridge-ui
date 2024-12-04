@@ -13,7 +13,7 @@ export const BalanceDisplay = ({
   return (
     <Grid container spacing={3} mb={2}>
       <Grid item xs={12}>
-        <TokenBalance usdtBalance={usdtBalance} />
+        <TokenBalance />
       </Grid>
     </Grid>
   );

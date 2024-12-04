@@ -15,7 +15,6 @@ interface BridgeInterfaceProps {
   withdrawalTransactions: Transaction[];
   onTransactionButtonClick: (transaction: Transaction) => void;
   onReset: () => void;
-  usdtBalance: string;
   amount: string;
   needsApproval: boolean;
   setNeedsApproval: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,7 +30,6 @@ export const BridgeInterface = ({
   withdrawalTransactions,
   onTransactionButtonClick,
   onReset,
-  usdtBalance,
   amount,
   needsApproval,
   setNeedsApproval
@@ -65,7 +63,6 @@ export const BridgeInterface = ({
       </Box>
 
       <BalanceDisplay 
-        usdtBalance={usdtBalance}
         selectedChain={selectedChain}
         amount={amount}
         onApprovalComplete={() => setNeedsApproval(false)}

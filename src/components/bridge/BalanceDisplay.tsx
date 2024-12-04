@@ -3,7 +3,6 @@ import { TokenBalance } from '../balance/TokenBalance';
 import { Approval } from '../balance/Approval';
 
 interface BalanceDisplayProps {
-  usdtBalance: string;
   selectedChain: string;
   amount: string;
   onApprovalComplete: () => void;
@@ -11,7 +10,6 @@ interface BalanceDisplayProps {
 }
 
 export const BalanceDisplay = ({ 
-  usdtBalance, 
   selectedChain,
   amount,
   onApprovalComplete,
@@ -20,7 +18,7 @@ export const BalanceDisplay = ({
   return (
     <Grid container spacing={3} mb={2}>
       <Grid item xs={12}>
-        <TokenBalance usdtBalance={usdtBalance} />
+        <TokenBalance />
       </Grid>
       {needsApproval && (
         <Grid item xs={12}>

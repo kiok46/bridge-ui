@@ -1,15 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Container, Grid, Box, useTheme, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Container, Grid, Box, Typography } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction } from './types';
-import { useWalletContext } from './hooks/useWalletContext';
-import { useUSDTBalance } from './hooks/useUSDTBalance';
-import { useApproval } from './hooks/useApproval';
 import { EVMWallet } from './components/wallet/EVMWallet';
 import { BCHWallet } from './components/wallet/BCHWallet';
 
 export const App = () => {
-  const theme = useTheme();
   const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
   const [selectedChain, setSelectedChain] = useState('sepolia');
   const [amount, setAmount] = useState('0');
@@ -18,21 +14,6 @@ export const App = () => {
   const [activeWithdrawTransaction, setActiveWithdrawTransaction] = useState<Transaction | null>(null);
   const [depositTransactions, setDepositTransactions] = useState<Transaction[]>([]);
   const [withdrawalTransactions, setWithdrawalTransactions] = useState<Transaction[]>([]);
-
-  const { userEVMAddress } = useWalletContext();
-  const { balance: usdtBalance } = useUSDTBalance(selectedChain);
-  const { checkAllowance } = useApproval(selectedChain);
-
-  useEffect(() => {
-    const checkApprovalNeeded = async () => {
-      if (amount && userEVMAddress) {
-        const allowance = await checkAllowance();
-        setNeedsApproval(Number(amount) > Number(allowance));
-      }
-    };
-
-    checkApprovalNeeded();
-  }, [amount, userEVMAddress, checkAllowance]);
 
   const handleTransactionButtonClick = (transaction: Transaction) => {
     if (transaction.type === 'Deposit') {
@@ -156,7 +137,6 @@ export const App = () => {
                 withdrawalTransactions={withdrawalTransactions}
                 onTransactionButtonClick={handleTransactionButtonClick}
                 onReset={handleReset}
-                usdtBalance={usdtBalance}
                 amount={amount}
                 needsApproval={needsApproval}
                 setNeedsApproval={setNeedsApproval}

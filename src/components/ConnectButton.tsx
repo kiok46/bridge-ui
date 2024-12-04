@@ -1,18 +1,22 @@
 import { Button } from '@mui/material';
-import { themeConstants } from '../../theme/constants';
+import { themeConstants } from '../theme/constants';
 
-interface WalletConnectProps {
-  onConnect: () => Promise<void>;
+interface ConnectButtonProps {
+  onClick?: () => Promise<any>;
+  children?: React.ReactNode;
+  fullWidth?: boolean;
+  disabled?: boolean;
 }
 
-export const WalletConnect = ({ onConnect }: WalletConnectProps) => {
+export const ConnectButton = ({ onClick, children = 'Connect with WalletConnect', fullWidth = true, disabled }: ConnectButtonProps) => {
   return (
     <Button
-      onClick={onConnect}
-      fullWidth
+      onClick={onClick}
+      fullWidth={fullWidth}
+      disabled={disabled}
       sx={{
         background: themeConstants.colors.primary.gradient,
-        color: '#FFFFFF',
+        color: '#FFFFFF', 
         textTransform: 'none',
         borderRadius: themeConstants.borderRadius.medium,
         padding: '10px',
@@ -24,7 +28,7 @@ export const WalletConnect = ({ onConnect }: WalletConnectProps) => {
         }
       }}
     >
-      Connect with WalletConnect
+      {children}
     </Button>
   );
-}; 
+};
