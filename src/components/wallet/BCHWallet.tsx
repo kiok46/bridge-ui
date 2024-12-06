@@ -1,15 +1,24 @@
+import React, { useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
 import { themeConstants } from '../../theme/constants';
 import { useWalletConnectBCH } from '../../hooks/useWalletConnectBCH';
 import { ConnectButton } from '../ConnectButton';
 
-export const BCHWallet = () => {
+interface BCHWalletProps {
+  onAddressUpdate: (address: string) => void;
+}
+
+export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
   const { 
     address, 
     isInitializing, 
     connect, 
     disconnect 
   } = useWalletConnectBCH();
+
+  useEffect(() => {
+    onAddressUpdate(address);
+  }, [address]);
 
   return (
     <Stack spacing={2}>

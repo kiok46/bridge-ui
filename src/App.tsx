@@ -4,6 +4,7 @@ import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
 import { BCHWallet } from './components/wallet/BCHWallet';
+import { TokenBalance } from './components/balance/TokenBalance';
 
 export const App = () => {
   const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
@@ -14,6 +15,8 @@ export const App = () => {
   const [activeWithdrawTransaction, setActiveWithdrawTransaction] = useState<Transaction | null>(null);
   const [depositTransactions, setDepositTransactions] = useState<Transaction[]>([]);
   const [withdrawalTransactions, setWithdrawalTransactions] = useState<Transaction[]>([]);
+  const [bchAddress, setBchAddress] = useState<string | null>(null);
+  const [evmAddress, setEvmAddress] = useState<string | null>(null);
 
   const handleTransactionButtonClick = (transaction: Transaction) => {
     if (transaction.type === 'Deposit') {
@@ -98,10 +101,14 @@ export const App = () => {
                   }
                 }}
               >
-                <BCHWallet />
+                <BCHWallet onAddressUpdate={setBchAddress} />
               </Box>
             </Grid>
           </Grid>
+
+          <Box sx={{ mb: 4 }}>
+            <TokenBalance />
+          </Box>
 
           <Box
             sx={{
@@ -140,10 +147,13 @@ export const App = () => {
                 amount={amount}
                 needsApproval={needsApproval}
                 setNeedsApproval={setNeedsApproval}
+                bchAddress={bchAddress}
+                evmAddress={evmAddress}
               />
             </Box>
           </Box>
         </Box>
+        
       </Container>
     </Box>
   );

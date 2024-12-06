@@ -1,9 +1,8 @@
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { useState, useEffect } from 'react';
-import { disconnect } from 'process';
 
-const projectId = 'b6ee57015454e10cfc3ec52fcaa7ceff';
+const projectId = 'bcf35dc8f8757c1b15883b9161a6c8bf';
 const wcMetadataBCH = {
   name: 'Token Bridge (BCH)',
   description: 'Token Bridge (BCH)',
@@ -28,6 +27,12 @@ export const useWalletConnectBCH = () => {
   const [walletConnectModal, setWalletConnectModal] = useState<WalletConnectModal | null>(null);
   const [address, setAddress] = useState('');
   const [isInitializing, setIsInitializing] = useState(true);
+
+  const isSessionExpired = (session) => {
+    // Assuming session has an 'expiry' property which is a timestamp
+    const currentTime = Date.now();
+    return session.expiry && session.expiry < currentTime;
+  };
 
   // Setup WalletConnect client and event handlers on initial render
   useEffect(() => {
@@ -57,11 +62,21 @@ export const useWalletConnectBCH = () => {
           const sessions = client.session.getAll();
           if (sessions.length > 0) {
             const session = sessions[sessions.length - 1];
-            setSession(session);
+            if (!isSessionExpired(session)) {
+              setSession(session);
+            } else {
+              console.log("Session is expired");
+            }
           }
         } catch (sessionError) {
           console.log("No active sessions found");
         }
+
+        // Add event listeners for session events
+        client.on('session_delete', handleSessionDelete);
+        client.on('session_expire', handleSessionExpire);
+        // Add other event listeners as needed
+
       } catch (error) {
         console.log("Failed to initialize WalletConnect:", error);
       } finally {
@@ -70,7 +85,28 @@ export const useWalletConnectBCH = () => {
     };
 
     initWalletConnect();
+
+    // Cleanup event listeners on unmount
+    return () => {
+      if (signClient) {
+        signClient.off('session_delete', handleSessionDelete);
+        signClient.off('session_expire', handleSessionExpire);
+        signClient.core.relayer.events.removeAllListeners();
+      }
+    };
   }, []);
+
+  const handleSessionDelete = (session) => {
+    console.log("Session deleted:", session);
+    setSession(null);
+    setAddress('');
+  };
+
+  const handleSessionExpire = (session) => {
+    console.log("Session expired:", session);
+    setSession(null);
+    setAddress('');
+  };
 
   const connect = async () => {
     if (!signClient || !walletConnectModal) {
@@ -124,6 +160,14 @@ export const useWalletConnectBCH = () => {
     if (!lastSession || !signClient) return;
 
     try {
+      // Check if the session is expired before attempting to disconnect
+      if (isSessionExpired(lastSession)) {
+        console.log("Session is already expired");
+        setSession(null);
+        setAddress('');
+        return;
+      }
+
       await signClient.disconnect({
         topic: lastSession.topic,
         reason: { code: 6000, message: "User disconnected" }

@@ -4,7 +4,7 @@ import { WalletConnectModal } from '@walletconnect/modal';
 import { BrowserProvider } from 'ethers';
 import { SessionTypes } from '@walletconnect/types';
 
-const projectId = 'b6ee57015454e10cfc3ec52fcaa7ceff';
+const projectId = 'a6add77c2bbd3721384e5a757720b4b2';
 
 const modalConfig = {
   projectId,
