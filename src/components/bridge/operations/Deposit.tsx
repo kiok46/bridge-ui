@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { bridgeAbi } from '../../../constants';
 import { Transaction } from '../../../types';
 import { Approval } from '../../balance/Approval';
-import { useWalletConnectEVM } from '../../../hooks/useWalletConnectEVM';
+import { useWalletEVM } from '../../../hooks/useWalletEVM';
 import { SUPPORTED_NETWORKS } from '../../../config/networks';
 
 interface DepositProps {
@@ -19,7 +19,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
   const [bridgeStatus, setBridgeStatus] = useState('not-started');
   const [bridgedAmount, setBridgedAmount] = useState<string | null>(null);
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { getAllowance, approveUSDT } = useWalletConnectEVM();
+  const { getAllowance, approveUSDT } = useWalletEVM();
   
   const [depositAmount, setDepositAmount] = useState(1);
 

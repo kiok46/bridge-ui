@@ -1,10 +1,10 @@
 import { Box, Typography, Stack, Button } from '@mui/material';
 import { ConnectButton } from '../ConnectButton';
 import { themeConstants } from '../../theme/constants';
-import { useWalletConnectEVM } from '../../hooks/useWalletConnectEVM';
+import { useWalletEVM } from '../../hooks/useWalletEVM';
 
 export const EVMWallet = () => {
-  const { address, disconnect, network, connect, isInitializing } = useWalletConnectEVM();
+  const { address, disconnect, network, connect, isInitializing } = useWalletEVM();
 
   return (
     <Stack spacing={2}>

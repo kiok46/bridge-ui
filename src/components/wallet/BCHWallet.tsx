@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
 import { themeConstants } from '../../theme/constants';
-import { useWalletConnectBCH } from '../../hooks/useWalletConnectBCH';
+import { useWalletBCH } from '../../hooks/useWalletBCH';
 import { ConnectButton } from '../ConnectButton';
 
 interface BCHWalletProps {
@@ -14,7 +14,7 @@ export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
     isInitializing, 
     connect, 
     disconnect 
-  } = useWalletConnectBCH();
+  } = useWalletBCH();
 
   useEffect(() => {
     onAddressUpdate(address);

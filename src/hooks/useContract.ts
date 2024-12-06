@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { ContractService } from '../services/contractService';
 import { useNotificationHandlers } from './useNotificationContext';
-import { useWalletConnectEVM } from './useWalletConnectEVM';
+import { useWalletEVM } from './useWalletEVM';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../utils/constants';
 import { parseAmount } from '../utils/helpers';
 
 export const useContract = (network: string) => {
   const [loading, setLoading] = useState(false);
   const { showSuccess, showError } = useNotificationHandlers();
-  const { isConnected } = useWalletConnectEVM();
+  const { isConnected } = useWalletEVM();
   const contractService = new ContractService(network);
 
   const handleError = (error: any, message: string) => {

@@ -21,7 +21,7 @@ const namespaces = {
   },
 };
 
-export const useWalletConnectBCH = () => {
+export const useWalletBCH = () => {
   const [signClient, setSignClient] = useState<SignClient | null>(null);
   const [lastSession, setSession] = useState(null);
   const [walletConnectModal, setWalletConnectModal] = useState<WalletConnectModal | null>(null);
@@ -30,7 +30,7 @@ export const useWalletConnectBCH = () => {
 
   const isSessionExpired = (session) => {
     // Assuming session has an 'expiry' property which is a timestamp
-    const currentTime = Date.now();
+    const currentTime = Math.floor(Date.now() / 1000); // Convert milliseconds to seconds
     return session.expiry && session.expiry < currentTime;
   };
 

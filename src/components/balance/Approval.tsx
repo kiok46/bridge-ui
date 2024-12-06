@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useApproval } from '../../hooks/useApproval';
 import { formatAmount } from '../../utils/helpers';
-import { useWalletConnectEVM } from '../../hooks/useWalletConnectEVM';
+import { useWalletEVM } from '../../hooks/useWalletEVM';
 
 interface ApprovalProps {
   selectedChain: string;
@@ -15,7 +15,7 @@ export const Approval = ({ selectedChain, amount, onApprovalComplete, address }:
   const [needsApproval, setNeedsApproval] = useState(false);
   const { checkAllowance, approve } = useApproval(selectedChain, address);
 
-  const { address: evmAddress, approveUSDT} = useWalletConnectEVM();
+  const { address: evmAddress, approveUSDT} = useWalletEVM();
   console.log('ok', evmAddress);
 
   useEffect(() => {
