@@ -228,12 +228,18 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                   disabled={!needsApproval}
                   fullWidth
                   sx={{
-                    borderColor: needsApproval ? '#FFFFFF' : '#6c757d',
-                    color: '#FFFFFF',
+                    borderColor: needsApproval ? '#FFFFFF' : '#62677B',
+                    color: needsApproval ? '#FFFFFF' : '#62677B',
                     '&:hover': {
-                      borderColor: needsApproval ? '#2EBAC6' : '#5a6268',
+                      borderColor: needsApproval ? '#2EBAC6' : '#62677B',
                       backgroundColor: 'transparent',
-                    }
+                    },
+                    '&:disabled': {
+                      borderColor: '#62677B',
+                      color: '#62677B',
+                    },
+                    borderRadius: '12px',
+                    padding: '0.5rem 1.5rem',
                   }}
                 >
                   {needsApproval ? 'Approve USDT' : 'Already Approved'}
