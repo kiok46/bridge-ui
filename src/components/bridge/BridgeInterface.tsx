@@ -44,64 +44,47 @@ export const BridgeInterface = ({
       sx={{ 
         padding: '2rem', 
         marginBottom: '2rem',
-        backgroundColor: '#f7f9fc', // Aave's light background color
-        borderRadius: '12px', // Slightly more rounded corners
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Aave's subtle shadow
+        backgroundColor: '#1B2030',
+        borderRadius: '12px',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        color: '#FFFFFF'
       }}
     >
       <Box display="flex" justifyContent="center" mb={2}>
         <Button 
           variant={direction === 'toBCH' ? 'contained' : 'outlined'}
-          color="primary"
           onClick={() => setDirection('toBCH')}
           sx={{ 
             marginRight: '1rem',
-            backgroundColor: direction === 'toBCH' ? '#2a2a72' : 'transparent', // Aave's primary button color
-            color: direction === 'toBCH' ? '#ffffff' : '#2a2a72', // Text color
-            borderColor: '#2a2a72', // Border color for outlined
+            backgroundColor: direction === 'toBCH' ? '#B6509E' : 'transparent',
+            color: direction === 'toBCH' ? '#ffffff' : '#B6509E',
+            borderColor: '#B6509E',
             '&:hover': {
-              backgroundColor: direction === 'toBCH' ? '#1a1a5e' : '#f0f0f0',
+              backgroundColor: direction === 'toBCH' ? '#A3458C' : 'rgba(182, 80, 158, 0.1)',
             },
-            borderRadius: '8px', // Rounded corners
-            padding: '0.5rem 1.5rem', // Padding for a more spacious button
+            borderRadius: '8px',
+            padding: '0.5rem 1.5rem',
           }}
         >
           Deposit
         </Button>
         <Button 
           variant={direction === 'toEVM' ? 'contained' : 'outlined'}
-          color="primary"
           onClick={() => setDirection('toEVM')}
           sx={{
-            backgroundColor: direction === 'toEVM' ? '#2a2a72' : 'transparent', // Aave's primary button color
-            color: direction === 'toEVM' ? '#ffffff' : '#2a2a72', // Text color
-            borderColor: '#2a2a72', // Border color for outlined
+            backgroundColor: direction === 'toEVM' ? '#2EBAC6' : 'transparent',
+            color: direction === 'toEVM' ? '#ffffff' : '#2EBAC6',
+            borderColor: '#2EBAC6',
             '&:hover': {
-              backgroundColor: direction === 'toEVM' ? '#1a1a5e' : '#f0f0f0',
+              backgroundColor: direction === 'toEVM' ? '#259DAF' : 'rgba(46, 186, 198, 0.1)',
             },
-            borderRadius: '8px', // Rounded corners
-            padding: '0.5rem 1.5rem', // Padding for a more spacious button
+            borderRadius: '8px',
+            padding: '0.5rem 1.5rem',
           }}
         >
           Withdraw
         </Button>
-        {/* <Button 
-          variant="outlined"
-          color="secondary"
-          onClick={onReset}
-          sx={{ 
-            marginLeft: '1rem',
-            color: '#6c757d', // Aave's secondary button color
-            borderColor: '#6c757d', // Border color for outlined
-            '&:hover': {
-              backgroundColor: '#f0f0f0',
-            },
-            borderRadius: '8px', // Rounded corners
-            padding: '0.5rem 1.5rem', // Padding for a more spacious button
-          }}
-        >
-          Reset
-        </Button> */}
       </Box>
 
       {direction === 'toBCH' ? (
@@ -142,9 +125,10 @@ export const BridgeInterface = ({
         severity="info" 
         sx={{ 
           marginTop: '1rem',
-          backgroundColor: '#e9ecef', // Aave's info background color
-          color: '#0c5460', // Aave's info text color
-          borderRadius: '8px', // Rounded corners
+          backgroundColor: 'rgba(46, 186, 198, 0.1)',
+          color: '#2EBAC6',
+          borderRadius: '8px',
+          border: '1px solid rgba(46, 186, 198, 0.2)'
         }}
       >
         Note: Bridging process may take 2 hours to 1 day to complete

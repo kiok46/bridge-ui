@@ -143,10 +143,10 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
         display: 'flex', 
         flexDirection: 'column', 
         gap: '1rem', 
-        backgroundColor: '#f7f9fc', // Aave's light background color
+        backgroundColor: '#2C2F36', // Darker background
         padding: '2rem', 
-        borderRadius: '8px', 
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Aave's subtle shadow
+        borderRadius: '12px', 
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' 
       }}
     >
         <Stepper 
@@ -154,24 +154,47 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
           orientation="vertical"
           sx={{
             '.MuiStepLabel-label': {
-              color: '#2a2a2a', // Aave's text color
+              color: '#FFFFFF', // White text
               fontWeight: 'bold',
             },
             '.MuiStepContent-root': {
-              borderLeft: '2px solid #e0e0e0', // Aave's border style
+              borderLeft: '2px solid #e0e0e0', // Existing border style
             }
           }}
         >
           {steps.map((label, index) => (
             <Step key={label} disabled={isStepDisabled(index)}>
-              <StepLabel>{label}</StepLabel>
+                          <StepLabel 
+              sx={{
+                '& .MuiStepLabel-label': {
+                  color: '#FFFFFF', // White text
+                  '&.Mui-active': {
+                    color: '#2EBAC6', // Teal when active
+                  },
+                  '&.Mui-completed': {
+                    color: '#B6509E', // Pink when completed
+                  }
+                },
+                '& .MuiStepIcon-root': {
+                  color: '#37474F', // Dark gray background
+                  '&.Mui-active': {
+                    color: '#2EBAC6', // Teal when active
+                  },
+                  '&.Mui-completed': {
+                    color: '#B6509E', // Pink when completed
+                  }
+                }
+              }}
+            >
+              {label}
+            </StepLabel>
               <StepContent>
               <Typography 
                 
                 sx={{ 
                   mb: 5, 
                   padding: '0.5rem',
-                  color: '#6c757d' // Aave's secondary text color
+                  color: '#B0BEC5' // Lighter text color for better contrast
                 }}
               >
                 {stepDescriptions[index]}
@@ -193,8 +216,12 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
                     sx={{ 
                       marginBottom: '1rem', 
                       '& .MuiInputBase-root': {
-                        backgroundColor: '#ffffff', // Aave's input background
+                        backgroundColor: '#37474F', // Darker input background
                         borderRadius: '4px',
+                        color: '#FFFFFF' // White text for input
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#B0BEC5' // Lighter text color for label
                       }
                     }}
                   />
@@ -202,46 +229,47 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
                 {index === 1 && (
                   <>
                     <Button
-                      variant="contained"
-                      color="primary"
+                      variant="outlined"
                       onClick={startExit}
                       fullWidth
                       disabled={!!transaction?.exitId}
                       sx={{
-                        backgroundColor: '#2a2a72', // Aave's primary button color
+                        borderColor: '#FFFFFF',
+                        color: '#FFFFFF',
                         '&:hover': {
-                          backgroundColor: '#1a1a5e',
+                          borderColor: '#2EBAC6',
+                          backgroundColor: 'transparent',
                         },
-                        borderRadius: '8px', // Rounded corners
-                        padding: '0.5rem 1.5rem', // Padding for a more spacious button
+                        borderRadius: '12px',
+                        padding: '0.5rem 1.5rem',
                       }}
                     >
                       Start Exit
                     </Button>
                     {transaction?.exitId && (
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                         Exit ID: {transaction.exitId}
                       </Typography>
                     )}
                     {transaction?.exitIdTransactionHash && (
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                         Exit Transaction Hash: {transaction.exitIdTransactionHash}
                       </Typography>
                     )}
                     {startExitStatus === 'pending' && (
-                      <Typography variant="body2" color="info" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                         Exit claim in progress...
                       </Typography>
                     )}
                     {startExitStatus === 'completed' && startedExitAmount && (
-                      <Typography variant="body2" color="success" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                         Successfully claimed {ethers.formatUnits(startedExitAmount, 6)} USDT
                       </Typography>
                     )}
                   </>
                 )}
                 {index === 2 && (
-                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                     {transaction?.signature ? 
                       `Signature: ${transaction.signature}` :
                       'Waiting for approval signature...'
@@ -250,29 +278,30 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
                 )}
                 {index === 3 && (
                   <Button
-                    variant="contained"
-                    color="primary"
+                    variant="outlined"
                     onClick={processExit}
                     fullWidth
                     sx={{
-                      backgroundColor: '#2a2a72', // Aave's primary button color
+                      borderColor: '#FFFFFF',
+                      color: '#FFFFFF',
                       '&:hover': {
-                        backgroundColor: '#1a1a5e',
+                        borderColor: '#2EBAC6',
+                        backgroundColor: 'transparent',
                       },
-                      borderRadius: '8px', // Rounded corners
-                      padding: '0.5rem 1.5rem', // Padding for a more spacious button
+                      borderRadius: '12px',
+                      padding: '0.5rem 1.5rem',
                     }}
                   >
                     Process Exit
                   </Button>
                 )}
                 {index === 0 && transaction?.transactionHash && (
-                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                     Transaction Hash: {transaction.transactionHash}
                   </Typography>
                 )}
                 {index === 0 && transaction?.amount && (
-                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ mt: 1, color: '#B0BEC5' }}>
                     Transaction Amount: {ethers.formatUnits(transaction.amount, 6)} USDT
                   </Typography>
                 )}
@@ -281,27 +310,39 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
                     disabled={activeStep === 0} 
                     onClick={handleBack}
                     sx={{
-                      color: '#2a2a72', // Aave's link color
+                      borderColor: '#FFFFFF',
+                      color: '#FFFFFF',
                       '&:hover': {
+                        borderColor: '#2EBAC6',
                         backgroundColor: 'transparent',
-                        textDecoration: 'underline',
-                      }
+                      },
+                      '&:disabled': {
+                        borderColor: '#62677B',
+                        color: '#62677B',
+                      },
+                      borderRadius: '12px',
+                      padding: '0.5rem 1.5rem',
                     }}
                   >
                     Back
                   </Button>
                   <Button
-                    variant="contained"
-                    color="primary"
+                    variant="outlined"
                     onClick={handleNext}
                     disabled={activeStep === steps.length - 1 || isStepDisabled(activeStep)}
                     sx={{
-                      backgroundColor: '#2a2a72', // Aave's primary button color
+                      borderColor: '#FFFFFF',
+                      color: '#FFFFFF',
                       '&:hover': {
-                        backgroundColor: '#1a1a5e',
+                        borderColor: '#2EBAC6',
+                        backgroundColor: 'transparent',
                       },
-                      borderRadius: '8px', // Rounded corners
-                      padding: '0.5rem 1.5rem', // Padding for a more spacious button
+                      '&:disabled': {
+                        borderColor: '#62677B',
+                        color: '#62677B',
+                      },
+                      borderRadius: '12px',
+                      padding: '0.5rem 1.5rem',
                     }}
                   >
                     {activeStep === steps.length - 1 ? 'Finish' : 'Next'}

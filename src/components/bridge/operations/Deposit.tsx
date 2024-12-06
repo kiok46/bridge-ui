@@ -113,10 +113,10 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
         display: 'flex', 
         flexDirection: 'column', 
         gap: '1rem', 
-        backgroundColor: '#f7f9fc', // Aave's light background color
+        backgroundColor: '#2C2F36',
         padding: '2rem', 
-        borderRadius: '8px', 
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Aave's subtle shadow
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
       }}
     >
       <Stepper 
@@ -124,24 +124,46 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
         orientation="vertical"
         sx={{
           '.MuiStepLabel-label': {
-            color: '#2a2a2a', // Aave's text color
+            color: '#FFFFFF',
             fontWeight: 'bold',
           },
           '.MuiStepContent-root': {
-            borderLeft: '2px solid #e0e0e0', // Aave's border style
+            borderLeft: '2px solid #e0e0e0',
           }
         }}
       >
         {steps.map((label, index) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel 
+              sx={{
+                '& .MuiStepLabel-label': {
+                  color: '#FFFFFF', // White text
+                  '&.Mui-active': {
+                    color: '#2EBAC6', // Teal when active
+                  },
+                  '&.Mui-completed': {
+                    color: '#B6509E', // Pink when completed
+                  }
+                },
+                '& .MuiStepIcon-root': {
+                  color: '#37474F', // Dark gray background
+                  '&.Mui-active': {
+                    color: '#2EBAC6', // Teal when active
+                  },
+                  '&.Mui-completed': {
+                    color: '#B6509E', // Pink when completed
+                  }
+                }
+              }}
+            >
+              {label}
+            </StepLabel>
             <StepContent>
               <Typography 
-                
                 sx={{ 
                   mb: 5, 
                   padding: '0.5rem',
-                  color: '#6c757d' // Aave's secondary text color
+                  color: '#FFFFFF' // White text
                 }}
               >
                 {stepDescriptions[index]}
@@ -160,10 +182,14 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                     }}
                     fullWidth
                     sx={{ 
-                      marginBottom: '1rem', 
+                      marginBottom: '1rem',
                       '& .MuiInputBase-root': {
-                        backgroundColor: '#ffffff', // Aave's input background
+                        backgroundColor: '#37474F',
                         borderRadius: '4px',
+                        color: '#FFFFFF'
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#FFFFFF'
                       }
                     }}
                   />
@@ -171,10 +197,10 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                     <Typography
                       variant="body1"
                       sx={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: '#37474F',
                         borderRadius: '4px',
                         padding: '1rem',
-                        color: '#2a2a2a'
+                        color: '#FFFFFF'
                       }}
                     >
                       {bchAddress}
@@ -183,10 +209,10 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                     <Typography
                       variant="body1"
                       sx={{
-                        backgroundColor: '#f8d7da',
+                        backgroundColor: '#37474F',
                         borderRadius: '4px',
                         padding: '1rem',
-                        color: '#721c24'
+                        color: '#FF6B6B' // Error red
                       }}
                     >
                       Please connect your BCH wallet
@@ -197,15 +223,16 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
 
               {index === 1 && (
                 <Button 
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
                   onClick={handleApprove}
                   disabled={!needsApproval}
                   fullWidth
                   sx={{
-                    backgroundColor: needsApproval ? '#007bff' : '#6c757d', // Aave's button colors
+                    borderColor: needsApproval ? '#FFFFFF' : '#6c757d',
+                    color: '#FFFFFF',
                     '&:hover': {
-                      backgroundColor: needsApproval ? '#0056b3' : '#5a6268',
+                      borderColor: needsApproval ? '#2EBAC6' : '#5a6268',
+                      backgroundColor: 'transparent',
                     }
                   }}
                 >
@@ -218,8 +245,8 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                   <Typography
                     variant="body2" 
                     sx={{
-                      color: '#721c24',
-                      backgroundColor: '#f8d7da',
+                      color: '#FF6B6B', // Error red
+                      backgroundColor: '#37474F',
                       padding: '0.75rem',
                       marginBottom: '1rem',
                       borderRadius: '4px'
@@ -228,15 +255,16 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                     Note: Once you send the funds to the bridge, you can only get it back by completing the entire process and then bridging the funds back from BCH
                   </Typography>
                   <Button 
-                    variant="contained"
-                    color="primary"
+                    variant="outlined"
                     onClick={bridge}
                     disabled={bridgeStatus === 'pending'}
                     fullWidth
                     sx={{
-                      backgroundColor: bridgeStatus === 'pending' ? '#6c757d' : '#007bff', // Aave's button colors
+                      borderColor: bridgeStatus === 'pending' ? '#6c757d' : '#FFFFFF',
+                      color: '#FFFFFF',
                       '&:hover': {
-                        backgroundColor: bridgeStatus === 'pending' ? '#5a6268' : '#0056b3',
+                        borderColor: bridgeStatus === 'pending' ? '#5a6268' : '#2EBAC6',
+                        backgroundColor: 'transparent',
                       }
                     }}
                   >
@@ -250,17 +278,24 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                   disabled={activeStep === 0} 
                   onClick={handleBack}
                   sx={{
-                    color: '#007bff', // Aave's link color
+                    borderColor: '#FFFFFF',
+                    color: '#FFFFFF',
                     '&:hover': {
+                      borderColor: '#2EBAC6',
                       backgroundColor: 'transparent',
-                      textDecoration: 'underline',
-                    }
+                    },
+                    '&:disabled': {
+                      borderColor: '#62677B',
+                      color: '#62677B',
+                    },
+                    borderRadius: '12px',
+                    padding: '0.5rem 1.5rem',
                   }}
                 >
                   Back
                 </Button>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   onClick={handleNext}
                   disabled={
                     (activeStep === 0 && (!depositAmount || !bchAddress)) ||
@@ -268,15 +303,24 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                     (activeStep === 2 && bridgeStatus !== 'completed')
                   }
                   sx={{
-                    backgroundColor: '#007bff', // Aave's button color
+                    borderColor: '#FFFFFF',
+                    color: '#FFFFFF',
                     '&:hover': {
-                      backgroundColor: '#0056b3',
-                    }
+                      borderColor: '#2EBAC6',
+                      backgroundColor: 'transparent',
+                    },
+                    '&:disabled': {
+                      borderColor: '#62677B',
+                      color: '#62677B',
+                    },
+                    borderRadius: '12px',
+                    padding: '0.5rem 1.5rem',
                   }}
                 >
                   Next
                 </Button>
               </Box>
+              
             </StepContent>
           </Step>
         ))}
@@ -296,8 +340,8 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
           severity="success" 
           sx={{ 
             textAlign: 'center',
-            backgroundColor: '#d4edda', // Aave's success background color
-            color: '#155724', // Aave's success text color
+            backgroundColor: '#37474F',
+            color: '#4CAF50', // Success green
             borderRadius: '4px',
           }}
         >

@@ -9,16 +9,6 @@ interface TokenSelectorProps {
 const TokenSelector: React.FC<TokenSelectorProps> = ({ selectedToken, onChange }) => {
   return (
     <Box>
-      {/* <Typography
-        variant="h6"
-        style={{
-          color: '#B6509E',
-          marginBottom: '10px',
-          fontWeight: 'bold',
-        }}
-      >
-        Select the token to bridge
-      </Typography> */}
       <Select
         value={selectedToken}
         onChange={onChange}
