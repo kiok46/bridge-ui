@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { Container, Grid, Box, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
 import { BCHWallet } from './components/wallet/BCHWallet';
 import { TokenBalance } from './components/balance/TokenBalance';
+import { BridgeExplainer } from './components/bridge/BridgeExplainer';
+import { ContractExplainer } from './components/bridge/ContractExplainer';
+import { TopNavBar } from './components/TopNavBar';
+import TokenSelector from './components/TokenSelector';
 
 export const App = () => {
   const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
@@ -17,6 +22,9 @@ export const App = () => {
   const [withdrawalTransactions, setWithdrawalTransactions] = useState<Transaction[]>([]);
   const [bchAddress, setBchAddress] = useState<string | null>(null);
   const [evmAddress, setEvmAddress] = useState<string | null>(null);
+  const [openExplainer, setOpenExplainer] = useState(false);
+  const [openContractExplainer, setOpenContractExplainer] = useState(false);
+  const [selectedToken, setSelectedToken] = useState('USDT');
 
   const handleTransactionButtonClick = (transaction: Transaction) => {
     if (transaction.type === 'Deposit') {
@@ -32,6 +40,10 @@ export const App = () => {
     setAmount('0');
   };
 
+  const handleTokenChange = (event: SelectChangeEvent) => {
+    setSelectedToken(event.target.value as string);
+  };
+
   return (
     <Box
       sx={{
@@ -42,6 +54,11 @@ export const App = () => {
         fontFamily: 'Inter, sans-serif',
       }}
     >
+      <TopNavBar
+        onOpenExplainer={() => setOpenExplainer(true)}
+        onOpenContractExplainer={() => setOpenContractExplainer(true)}
+      />
+
       <Container maxWidth="lg" sx={{ pt: 6 }}>
         <Box
           sx={{
@@ -56,7 +73,7 @@ export const App = () => {
           <Typography 
             variant="h4" 
             sx={{ 
-              mb: 4, 
+              mb: 2, 
               fontWeight: 600,
               background: 'linear-gradient(90deg, #B6509E 0%, #2EBAC6 100%)',
               WebkitBackgroundClip: 'text',
@@ -66,6 +83,40 @@ export const App = () => {
           >
             Cross-Chain Bridge
           </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 4,
+              p: 2,
+              backgroundColor: 'rgba(38, 41, 51, 0.7)',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Box sx={{ flex: 1, mr: 2 }}>
+              <TokenSelector selectedToken={selectedToken} onChange={handleTokenChange} />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <TokenBalance />
+            </Box>
+          </Box>
+
+          <Dialog open={openExplainer} onClose={() => setOpenExplainer(false)} fullWidth maxWidth="md">
+            <DialogTitle>Bridging Process Overview</DialogTitle>
+            <DialogContent>
+              <BridgeExplainer />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={openContractExplainer} onClose={() => setOpenContractExplainer(false)} fullWidth maxWidth="md">
+            <DialogTitle>USDT Contract Explainer</DialogTitle>
+            <DialogContent>
+              <ContractExplainer />
+            </DialogContent>
+          </Dialog>
 
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={6}>
@@ -105,10 +156,6 @@ export const App = () => {
               </Box>
             </Grid>
           </Grid>
-
-          <Box sx={{ mb: 4 }}>
-            <TokenBalance />
-          </Box>
 
           <Box
             sx={{

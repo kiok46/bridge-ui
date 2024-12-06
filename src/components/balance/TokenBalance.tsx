@@ -12,19 +12,19 @@ export const TokenBalance = () => {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        backgroundColor: '#e0e3eb', // Slightly darker background for contrast
-        borderRadius: '12px', // Rounded corners
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' // Aave's subtle shadow
+        backgroundColor: '#2C2F36', // Darker background
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
       }}
     >
       <Typography 
         variant="h6" 
         sx={{
-          color: '#1a1a5e', // Darker text color for better contrast
+          color: '#FFFFFF', // Lighter text color
           fontWeight: 'bold'
         }}
       >
-        Wrapped USDT on BCH: {usdtBalance}
+        Wrapped on BCH: {usdtBalance}
       </Typography>
     </Paper>
   );

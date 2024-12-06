@@ -1,7 +1,8 @@
 import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { bridgeAbi, BRIDGE_CONTRACT_ADDRESS } from './constants';
+import { bridgeAbi } from './constants';
+import { SUPPORTED_NETWORKS } from './config/networks';
 
 export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -49,7 +50,7 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(BRIDGE_CONTRACT_ADDRESS, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
       
       const amountToBridge = ethers.parseUnits(activeTransaction.amount, 6);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, activeTransaction.bchAddress);

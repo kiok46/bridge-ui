@@ -2,16 +2,21 @@ import { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useApproval } from '../../hooks/useApproval';
 import { formatAmount } from '../../utils/helpers';
+import { useWalletConnectEVM } from '../../hooks/useWalletConnectEVM';
 
 interface ApprovalProps {
   selectedChain: string;
   amount: string;
   onApprovalComplete: () => void;
+  address: string;
 }
 
-export const Approval = ({ selectedChain, amount, onApprovalComplete }: ApprovalProps) => {
+export const Approval = ({ selectedChain, amount, onApprovalComplete, address }: ApprovalProps) => {
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { checkAllowance, approve } = useApproval(selectedChain);
+  const { checkAllowance, approve } = useApproval(selectedChain, address);
+
+  const { address: evmAddress, approveUSDT} = useWalletConnectEVM();
+  console.log('ok', evmAddress);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
@@ -26,8 +31,11 @@ export const Approval = ({ selectedChain, amount, onApprovalComplete }: Approval
 
   const handleApprove = async () => {
     try {
-      await approve(amount);
+      console.log('ok1');
+      await approveUSDT("111555111", amount);
+      console.log('ok2');
       setNeedsApproval(false);
+      console.log('ok3');
       onApprovalComplete();
     } catch (error) {
       console.error('Error during approval:', error);

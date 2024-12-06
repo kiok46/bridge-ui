@@ -1,8 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
-import { BrowserProvider } from 'ethers';
+import { ethers } from 'ethers';
 import { SessionTypes } from '@walletconnect/types';
+import { USDT_ABI } from '../contracts/abis/USDT';
+import { USDT_ADDRESSES } from '../config/contracts';
+import { SUPPORTED_NETWORKS } from '../config/networks';
 
 const projectId = 'a6add77c2bbd3721384e5a757720b4b2';
 
@@ -221,9 +224,75 @@ export const useWalletConnectEVM = () => {
   }, [signClient, session]);
 
   const getProvider = useCallback(() => {
+    console.log('isConnected', isConnected);
+    console.log('address', address);
+    console.log('window.ethereum', window.ethereum);
     if (!isConnected || !address || !window.ethereum) return null;
-    return new BrowserProvider(window.ethereum);
+    return new ethers.BrowserProvider(window.ethereum);
   }, [isConnected, address]);
+
+  const getUSDTContract = useCallback(async (chainId: string) => {
+    console.log('getUSDTContract bruh');
+    const provider = getProvider();
+    console.log('provider', provider);
+    console.log('address', address);
+    
+    if (!provider || !address) return null;
+  
+    try {
+      const signer = await provider.getSigner();
+      return new ethers.Contract(
+        USDT_ADDRESSES[chainId],
+        USDT_ABI,
+        signer
+      );
+    } catch (error) {
+      console.error('Error getting USDT contract:', error);
+      return null;
+    }
+  }, [getProvider, address]);
+
+  const approveUSDT = useCallback(async (chainId: string, amount: string) => {
+    if (!signClient || !session) {
+      console.error('SignClient or session not available');
+      return;
+    }
+
+    try {
+      const contract = await getUSDTContract(chainId);
+      if (!contract) throw new Error('Failed to get USDT contract');
+
+      const amountInWei = ethers.parseUnits(amount, 6);
+
+      // Use the signer from the provider to sign the transaction
+      const provider = getProvider();
+      if (!provider) throw new Error('Provider not available');
+
+      const signer = await provider.getSigner();
+      // @ts-ignore
+      const tx = await contract.connect(signer).approve(
+        SUPPORTED_NETWORKS[chainId].contracts.BRIDGE,
+        amountInWei
+      );
+      await tx.wait();
+    } catch (error) {
+      console.error('Error approving USDT:', error);
+      throw error;
+    }
+  }, [getUSDTContract, signClient, session, getProvider]);
+
+  const getAllowance = useCallback(async (chainId: string, owner: string, spender: string) => {
+    try {
+      const contract = await getUSDTContract(chainId);
+      if (!contract) throw new Error('Failed to get USDT contract');
+
+      const allowance = await contract.allowance(owner, spender);
+      return ethers.formatUnits(allowance, 6); // Assuming USDT has 6 decimals
+    } catch (error) {
+      console.error('Error getting allowance:', error);
+      throw error;
+    }
+  }, [getUSDTContract]);
 
   return {
     address,
@@ -234,5 +303,7 @@ export const useWalletConnectEVM = () => {
     disconnect,
     getProvider,
     signClient,
+    approveUSDT,
+    getAllowance,
   };
 }; 

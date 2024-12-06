@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { ethers } from 'ethers';
-import { bridgeAbi, BRIDGE_CONTRACT_ADDRESS } from './constants';
+import { bridgeAbi } from './constants';
+import { SUPPORTED_NETWORKS } from './config/networks';
 
-const useStartExit = (amount, transactionHash) => {
+const useStartExit = (selectedChain: string, amount: string, transactionHash: string) => {
   const [startExitStatus, setStartExitStatus] = useState('not-started');
   const [startedExitAmount, setStartedExitAmount] = useState(null);
 
@@ -14,7 +15,7 @@ const useStartExit = (amount, transactionHash) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(BRIDGE_CONTRACT_ADDRESS, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
       
       const claimTx = await bridgeContract.claim(amount, transactionHash);
       
@@ -63,7 +64,7 @@ export const Withdraw = ({ selectedChain, transaction }) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(BRIDGE_CONTRACT_ADDRESS, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
       const startExitTx = await bridgeContract.startExit(transaction.amount, transaction.transactionHash);
       await startExitTx.wait();
       console.log('Exit started successfully');
@@ -77,7 +78,7 @@ export const Withdraw = ({ selectedChain, transaction }) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(BRIDGE_CONTRACT_ADDRESS, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
       const processExitTx = await bridgeContract.processExit(transaction.exitId, transaction.signature);
       await processExitTx.wait();
       console.log('Exit processed successfully');

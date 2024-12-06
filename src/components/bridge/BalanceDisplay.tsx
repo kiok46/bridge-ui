@@ -7,13 +7,15 @@ interface BalanceDisplayProps {
   amount: string;
   onApprovalComplete: () => void;
   needsApproval: boolean;
+  address: string;
 }
 
 export const BalanceDisplay = ({ 
   selectedChain,
   amount,
   onApprovalComplete,
-  needsApproval
+  needsApproval,
+  address
 }: BalanceDisplayProps) => {
   return (
     <Grid container spacing={3} mb={2}>
@@ -26,6 +28,7 @@ export const BalanceDisplay = ({
             selectedChain={selectedChain}
             amount={amount}
             onApprovalComplete={onApprovalComplete}
+            address={address}
           />
         </Grid>
       )}

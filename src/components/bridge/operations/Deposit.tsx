@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { ethers } from 'ethers';
-import { useApproval } from '../../../hooks/useApproval';
-import { bridgeAbi, BRIDGE_CONTRACT_ADDRESS } from '../../../constants';
+import { bridgeAbi } from '../../../constants';
 import { Transaction } from '../../../types';
 import { Approval } from '../../balance/Approval';
+import { useWalletConnectEVM } from '../../../hooks/useWalletConnectEVM';
+import { SUPPORTED_NETWORKS } from '../../../config/networks';
 
 interface DepositProps {
   selectedChain: string;
@@ -18,27 +19,25 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
   const [bridgeStatus, setBridgeStatus] = useState('not-started');
   const [bridgedAmount, setBridgedAmount] = useState<string | null>(null);
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { checkAllowance, approve } = useApproval(selectedChain);
+  const { getAllowance, approveUSDT } = useWalletConnectEVM();
   
-  const [depositData, setDepositData] = useState({
-    amount: '1',
-  });
+  const [depositAmount, setDepositAmount] = useState(1);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
-      const allowance = await checkAllowance();
-      console.log(Number(depositData.amount), Number(allowance))
-      setNeedsApproval(Number(depositData.amount) > Number(allowance));
+      const allowance = await getAllowance(selectedChain, evmAddress, SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE);
+      console.log(Number(depositAmount), Number(allowance))
+      setNeedsApproval(Number(depositAmount) > Number(allowance));
     };
 
-    if (depositData.amount) {
+    if (depositAmount) {
       checkApprovalNeeded();
     }
-  }, [depositData.amount, checkAllowance]);
+  }, [depositAmount, getAllowance]);
 
   const handleApprove = async () => {
     try {
-      await approve(depositData.amount);
+      await approveUSDT(SUPPORTED_NETWORKS[selectedChain].chainId, depositAmount.toString());
       setNeedsApproval(false);
       handleNext();
     } catch (error) {
@@ -54,14 +53,14 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(BRIDGE_CONTRACT_ADDRESS, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
       
-      const amountToBridge = ethers.parseUnits(depositData.amount, 6);
+      const amountToBridge = ethers.parseUnits(depositAmount.toString(), 6);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, bchAddress);
       
       await bridgeTx.wait();
       setBridgeStatus('completed');
-      setBridgedAmount(depositData.amount);
+      setBridgedAmount(depositAmount.toString());
       handleNext();
     } catch (error) {
       console.error('Bridge error:', error);
@@ -84,7 +83,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
     if (/^\d+$/.test(value)) {
       const numValue = parseInt(value);
       if (numValue >= 1 && numValue <= 10000) {
-        setDepositData(prev => ({ ...prev, amount: value }));
+        setDepositAmount(numValue);
       }
     }
   };
@@ -101,7 +100,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
   const stepDescriptions = [
     'Specify the amount of USDT you wish to bridge. Ensure the amount is between 1 and 10000. Additionally, provide your BCH address where the bridged tokens will be sent. It is better to connect to a BCH wallet as you will have to use the same addres to claim your tokens in the steps below. This address is crucial for the final step of claiming your tokens on the BCH network.',
     'Authorize the specified amount of USDT to be spent by the bridge contract. This step is necessary to allow the contract to move your tokens. If you have already approved the required amount, this step will be skipped automatically.',
-    'Initiate the bridging process by moving your USDT to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees. Note: Once you send the funds to the bridge, you can only get it back by completing the entire process and then bridging the funds back from BCH',
+    'Initiate the bridging process by moving your USDT to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
     'Once the bridging transaction is confirmed, a claimNFT will be issued to your provided BCH address. This NFT represents your claim to the bridged tokens. You will need to wait for a specified period before you can claim the wUSDT on the BCH network.',
     'Switch to the Bitcoin Cash network using your wallet. This step is necessary to interact with the BCH network and claim your tokens.',
     'Claim your wUSDT on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
@@ -153,7 +152,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                   <TextField
                     type="text"
                     label="Enter amount (1-10000)"
-                    value={depositData.amount}
+                    value={depositAmount}
                     onChange={handleAmountChange}
                     inputProps={{ 
                       pattern: "\\d*",
@@ -215,21 +214,35 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
               )}
 
               {index === 2 && (
-                <Button 
-                  variant="contained"
-                  color="primary"
-                  onClick={bridge}
-                  disabled={bridgeStatus === 'pending'}
-                  fullWidth
-                  sx={{
-                    backgroundColor: bridgeStatus === 'pending' ? '#6c757d' : '#007bff', // Aave's button colors
-                    '&:hover': {
-                      backgroundColor: bridgeStatus === 'pending' ? '#5a6268' : '#0056b3',
-                    }
-                  }}
-                >
-                  {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge USDT'}
-                </Button>
+                <>
+                  <Typography
+                    variant="body2" 
+                    sx={{
+                      color: '#721c24',
+                      backgroundColor: '#f8d7da',
+                      padding: '0.75rem',
+                      marginBottom: '1rem',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    Note: Once you send the funds to the bridge, you can only get it back by completing the entire process and then bridging the funds back from BCH
+                  </Typography>
+                  <Button 
+                    variant="contained"
+                    color="primary"
+                    onClick={bridge}
+                    disabled={bridgeStatus === 'pending'}
+                    fullWidth
+                    sx={{
+                      backgroundColor: bridgeStatus === 'pending' ? '#6c757d' : '#007bff', // Aave's button colors
+                      '&:hover': {
+                        backgroundColor: bridgeStatus === 'pending' ? '#5a6268' : '#0056b3',
+                      }
+                    }}
+                  >
+                    {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge USDT'}
+                  </Button>
+                </>
               )}
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
@@ -250,7 +263,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                   variant="contained"
                   onClick={handleNext}
                   disabled={
-                    (activeStep === 0 && (!depositData.amount || !bchAddress)) ||
+                    (activeStep === 0 && (!depositAmount || !bchAddress)) ||
                     (activeStep === 1 && needsApproval) ||
                     (activeStep === 2 && bridgeStatus !== 'completed')
                   }
@@ -272,8 +285,9 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
       {needsApproval && (
         <Approval 
           selectedChain={selectedChain}
-          amount={depositData.amount}
+          amount={depositAmount.toString()}
           onApprovalComplete={() => setNeedsApproval(false)}
+          address={evmAddress}
         />
       )}
 

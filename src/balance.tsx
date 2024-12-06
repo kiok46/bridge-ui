@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { supportedNetworks, BRIDGE_CONTRACT_ADDRESS } from './constants';
+import { SUPPORTED_NETWORKS } from './config/networks';
 
-export const useUSDTBalance = () => {
+export const useUSDTBalance = (selectedChain: string) => {
   const [usdtBalance, setUsdtBalance] = useState('0');
 
   const fetchUSDTBalance = async () => {
@@ -16,9 +16,9 @@ export const useUSDTBalance = () => {
       const signer = await provider.getSigner();
       
       const tokenAbi = ["function balanceOf(address account) public view returns (uint256)"];
-      const tokenContract = new ethers.Contract(supportedNetworks.find(net => net.network === 'sepolia').usdtAddress, tokenAbi, signer);
+      const tokenContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.USDT, tokenAbi, signer);
       
-      const balance = await tokenContract.balanceOf(BRIDGE_CONTRACT_ADDRESS);
+      const balance = await tokenContract.balanceOf(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE);
       setUsdtBalance(ethers.formatUnits(balance, 6));
     } catch (error) {
       console.error('Error fetching USDT balance:', error);
