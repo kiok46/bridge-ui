@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { USDT_ABI } from '../contracts/abis/USDT';
-import { USDT_ADDRESSES } from '../config/contracts';
+import { TOKEN_ABI } from '../contracts/abis/Token';
 import { SUPPORTED_NETWORKS } from '../config/networks';
+import { TokenConfig } from '../types/tokens';
 
-export const useWalletEVM = () => {
+export const useWalletEVM = (selectedToken: TokenConfig) => {
   const [address, setAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -74,12 +74,11 @@ export const useWalletEVM = () => {
   }, []);
 
   const getProvider = useCallback(() => {
-    console.log('getProvider', isConnected, address, window.ethereum)
     if (!isConnected || !address || !window.ethereum) return null;
     return new ethers.BrowserProvider(window.ethereum);
   }, [isConnected, address]);
 
-  const getUSDTContract = useCallback(async (chainId: string) => {
+  const getTokenContract = useCallback(async (tokenAddress: string) => {
     const provider = getProvider();
     if (!provider) {
       console.error('Provider not available');
@@ -89,35 +88,34 @@ export const useWalletEVM = () => {
       console.error('No wallet address available');
       return null;
     }
-    if (!USDT_ADDRESSES[chainId]) {
-      console.error(`No USDT address configured for chain ID: ${chainId}`);
+    if (!tokenAddress) {
+      console.error(`No token address configured for chain ID: ${tokenAddress}`);
       return null;
     }
   
     try {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
-        USDT_ADDRESSES[chainId],
-        USDT_ABI,
+        tokenAddress,
+        TOKEN_ABI,
         signer
       );
       
       // Verify the contract is properly instantiated
       if (!contract.runner) {
-        throw new Error('Contract not properly initialized');
+        console.error('Contract not properly initialized');
       }
       
       return contract;
     } catch (error) {
-      console.error('Error getting USDT contract:', error);
-      throw new Error(`Failed to get USDT contract: ${error.message}`);
+      console.error('Error getting token contract:', error);
     }
   }, [getProvider, address]);
 
-  const approveUSDT = useCallback(async (chainId: string, amount: string) => {
+  const approveToken = useCallback(async (amount: string) => {
     try {
-      const contract = await getUSDTContract(chainId);
-      if (!contract) throw new Error('Failed to get USDT contract');
+      const contract = await getTokenContract(selectedToken.address);
+      if (!contract) throw new Error('Failed to get token contract');
 
       const amountInWei = ethers.parseUnits(amount, 6);
       const provider = getProvider();
@@ -126,7 +124,7 @@ export const useWalletEVM = () => {
       const signer = await provider.getSigner();
       // @ts-ignore
       const tx = await contract.connect(signer).approve(
-        SUPPORTED_NETWORKS[chainId].contracts.BRIDGE,
+        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress,
         amountInWei
       );
       await tx.wait();
@@ -134,20 +132,20 @@ export const useWalletEVM = () => {
       console.error('Error approving USDT:', error);
       throw error;
     }
-  }, [getUSDTContract, getProvider]);
+  }, [getTokenContract, getProvider]);
 
-  const getAllowance = useCallback(async (chainId: string, owner: string, spender: string) => {
+  const getAllowance = useCallback(async (address: string, spender: string) => {
     try {
-      const contract = await getUSDTContract(chainId);
-      if (!contract) throw new Error('Failed to get USDT contract');
+      const contract = await getTokenContract(selectedToken.address);
+      if (!contract) throw new Error('Failed to get token contract');
 
-      const allowance = await contract.allowance(owner, spender);
+      const allowance = await contract.allowance(address, spender);
       return ethers.formatUnits(allowance, 6);
     } catch (error) {
       console.error('Error getting allowance:', error);
       throw error;
     }
-  }, [getUSDTContract]);
+  }, [getTokenContract]);
 
   return {
     address,
@@ -157,7 +155,7 @@ export const useWalletEVM = () => {
     connect,
     disconnect,
     getProvider,
-    approveUSDT,
+    approveToken,
     getAllowance,
   };
 }; 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
@@ -10,10 +9,10 @@ import { BridgeExplainer } from './components/bridge/BridgeExplainer';
 import { ContractExplainer } from './components/bridge/ContractExplainer';
 import { TopNavBar } from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
+import { TokenConfig } from './types/tokens';
 
 export const App = () => {
   const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
-  const [selectedChain, setSelectedChain] = useState('sepolia');
   const [amount, setAmount] = useState('0');
   const [needsApproval, setNeedsApproval] = useState(false);
   const [activeDepositTransaction, setActiveDepositTransaction] = useState<Transaction | null>(null);
@@ -24,7 +23,7 @@ export const App = () => {
   const [evmAddress, setEvmAddress] = useState<string | null>(null);
   const [openExplainer, setOpenExplainer] = useState(false);
   const [openContractExplainer, setOpenContractExplainer] = useState(false);
-  const [selectedToken, setSelectedToken] = useState('USDT');
+  const [selectedToken, setSelectedToken] = useState<TokenConfig | null>(null);
 
   const handleTransactionButtonClick = (transaction: Transaction) => {
     if (transaction.type === 'Deposit') {
@@ -40,8 +39,8 @@ export const App = () => {
     setAmount('0');
   };
 
-  const handleTokenChange = (event: SelectChangeEvent) => {
-    setSelectedToken(event.target.value as string);
+  const handleTokenChange = (token: TokenConfig) => {
+    setSelectedToken(token);
   };
 
   return (
@@ -97,12 +96,12 @@ export const App = () => {
             }}
           >
             <Box sx={{ flex: 1, mr: 2 }}>
-              <TokenSelector selectedToken={selectedToken} onChange={handleTokenChange} />
+              <TokenSelector selectedToken={selectedToken} onSelect={handleTokenChange} />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <TokenBalance />
-            </Box>
-          </Box>
+              <TokenBalance selectedToken={selectedToken} />
+            </Box>  
+          </Box>  
 
           <Dialog open={openExplainer} onClose={() => setOpenExplainer(false)} fullWidth maxWidth="md">
             <DialogTitle>Bridging Process Overview</DialogTitle>
@@ -112,7 +111,7 @@ export const App = () => {
           </Dialog>
 
           <Dialog open={openContractExplainer} onClose={() => setOpenContractExplainer(false)} fullWidth maxWidth="md">
-            <DialogTitle>USDT Contract Explainer</DialogTitle>
+            <DialogTitle>Token Contract Explainer</DialogTitle>
             <DialogContent>
               <ContractExplainer />
             </DialogContent>
@@ -134,7 +133,7 @@ export const App = () => {
                   }
                 }}
               >
-                <EVMWallet />
+                <EVMWallet selectedToken={selectedToken} onAddressUpdate={setEvmAddress} />
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -182,9 +181,9 @@ export const App = () => {
               }}
             >
               <BridgeInterface
+                selectedToken={selectedToken}
                 direction={direction}
                 setDirection={setDirection}
-                selectedChain={selectedChain}
                 activeDepositTransaction={activeDepositTransaction}
                 activeWithdrawTransaction={activeWithdrawTransaction}
                 depositTransactions={depositTransactions}

@@ -1,31 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { ethers } from 'ethers';
-import { bridgeAbi } from '../../../constants';
+import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
 import { Transaction } from '../../../types';
 import { Approval } from '../../balance/Approval';
 import { useWalletEVM } from '../../../hooks/useWalletEVM';
 import { SUPPORTED_NETWORKS } from '../../../config/networks';
+import { TokenConfig } from '../../../types/tokens';
 
 interface DepositProps {
-  selectedChain: string;
+  selectedToken: TokenConfig;
   transaction: Transaction | null;
   bchAddress: string;
   evmAddress: string;
 }
 
-export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: DepositProps) => {
+export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: DepositProps) => {
   const [activeStep, setActiveStep] = useState(0);
   const [bridgeStatus, setBridgeStatus] = useState('not-started');
   const [bridgedAmount, setBridgedAmount] = useState<string | null>(null);
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { getAllowance, approveUSDT } = useWalletEVM();
+  const { getAllowance, approveToken } = useWalletEVM(selectedToken);
   
   const [depositAmount, setDepositAmount] = useState(1);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
-      const allowance = await getAllowance(selectedChain, evmAddress, SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE);
+      const allowance = await getAllowance(evmAddress, SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress);
       console.log(Number(depositAmount), Number(allowance))
       setNeedsApproval(Number(depositAmount) > Number(allowance));
     };
@@ -37,7 +38,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
 
   const handleApprove = async () => {
     try {
-      await approveUSDT(SUPPORTED_NETWORKS[selectedChain].chainId, depositAmount.toString());
+      await approveToken(depositAmount.toString());
       setNeedsApproval(false);
       handleNext();
     } catch (error) {
@@ -53,9 +54,9 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       
-      const amountToBridge = ethers.parseUnits(depositAmount.toString(), 6);
+      const amountToBridge = ethers.parseUnits(depositAmount.toString(), selectedToken.decimals);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, bchAddress);
       
       await bridgeTx.wait();
@@ -90,20 +91,20 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
 
   const steps = [
     'Enter amount', 
-    'Approve USDT', 
-    'Send USDT to the bridge', 
+    'Approve Token', 
+    'Send Token to the bridge', 
     'Waiting for approval', 
     'Switch to BCH', 
-    'Claim wUSDT'
+    'Claim wrapped token'
   ];
 
   const stepDescriptions = [
-    'Specify the amount of USDT you wish to bridge. Ensure the amount is between 1 and 10000. Additionally, provide your BCH address where the bridged tokens will be sent. It is better to connect to a BCH wallet as you will have to use the same addres to claim your tokens in the steps below. This address is crucial for the final step of claiming your tokens on the BCH network.',
-    'Authorize the specified amount of USDT to be spent by the bridge contract. This step is necessary to allow the contract to move your tokens. If you have already approved the required amount, this step will be skipped automatically.',
-    'Initiate the bridging process by moving your USDT to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
+    'Specify the amount of Token you wish to bridge. Ensure the amount is between 1 and 10000. Additionally, provide your BCH address where the bridged tokens will be sent. It is better to connect to a BCH wallet as you will have to use the same addres to claim your tokens in the steps below. This address is crucial for the final step of claiming your tokens on the BCH network.',
+    'Authorize the specified amount of Token to be spent by the bridge contract. This step is necessary to allow the contract to move your tokens. If you have already approved the required amount, this step will be skipped automatically.',
+    'Initiate the bridging process by moving your Token to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
     'Once the bridging transaction is confirmed, a claimNFT will be issued to your provided BCH address. This NFT represents your claim to the bridged tokens. You will need to wait for a specified period before you can claim the wUSDT on the BCH network.',
     'Switch to the Bitcoin Cash network using your wallet. This step is necessary to interact with the BCH network and claim your tokens.',
-    'Claim your wUSDT on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
+    'Claim your wrapped Token on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
   ];
 
   return (
@@ -274,7 +275,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
                       }
                     }}
                   >
-                    {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge USDT'}
+                    {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge Token'}
                   </Button>
                 </>
               )}
@@ -334,7 +335,7 @@ export const Deposit = ({ selectedChain, transaction, bchAddress, evmAddress }: 
 
       {needsApproval && (
         <Approval 
-          selectedChain={selectedChain}
+          selectedToken={selectedToken}
           amount={depositAmount.toString()}
           onApprovalComplete={() => setNeedsApproval(false)}
           address={evmAddress}

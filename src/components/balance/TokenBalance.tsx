@@ -1,8 +1,9 @@
 import { Paper, Typography } from '@mui/material';
-import { useUSDTBalance } from '../../hooks/useUSDTBalance';
+import { useTokenBalance } from '../../hooks/useTokenBalance';
+import { TokenConfig } from '../../types/tokens';
 
-export const TokenBalance = () => {
-  const usdtBalance = useUSDTBalance();
+export const TokenBalance = ({ selectedToken }: { selectedToken: TokenConfig }) => {
+  const tokenBalance = useTokenBalance(selectedToken);
   
   return (
     <Paper 
@@ -24,7 +25,7 @@ export const TokenBalance = () => {
           fontWeight: 'bold'
         }}
       >
-        Wrapped on BCH: {usdtBalance}
+        Wrapped on BCH: {tokenBalance}
       </Typography>
     </Paper>
   );

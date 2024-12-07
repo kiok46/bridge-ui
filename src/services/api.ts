@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { Transaction } from '../types';
 
 const API_BASE_URL = 'http://localhost:4000/v1/bridge';
 

@@ -2,21 +2,18 @@ import { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useApproval } from '../../hooks/useApproval';
 import { formatAmount } from '../../utils/helpers';
-import { useWalletEVM } from '../../hooks/useWalletEVM';
+import { TokenConfig } from '../../types/tokens';
 
 interface ApprovalProps {
-  selectedChain: string;
+  selectedToken: TokenConfig;
   amount: string;
   onApprovalComplete: () => void;
   address: string;
 }
 
-export const Approval = ({ selectedChain, amount, onApprovalComplete, address }: ApprovalProps) => {
+export const Approval = ({ selectedToken, amount, onApprovalComplete, address }: ApprovalProps) => {
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { checkAllowance, approve } = useApproval(selectedChain, address);
-
-  const { address: evmAddress, approveUSDT} = useWalletEVM();
-  console.log('ok', evmAddress);
+  const { checkAllowance, approve } = useApproval(selectedToken, address);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
@@ -31,11 +28,8 @@ export const Approval = ({ selectedChain, amount, onApprovalComplete, address }:
 
   const handleApprove = async () => {
     try {
-      console.log('ok1');
-      await approveUSDT("111555111", amount);
-      console.log('ok2');
+      await approve(amount);
       setNeedsApproval(false);
-      console.log('ok3');
       onApprovalComplete();
     } catch (error) {
       console.error('Error during approval:', error);
@@ -49,7 +43,7 @@ export const Approval = ({ selectedChain, amount, onApprovalComplete, address }:
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="body2" color="text.secondary" gutterBottom>
-        Approval needed for {formatAmount(amount)} USDT
+        Approval needed for {formatAmount(amount, selectedToken.decimals)} {selectedToken.symbol}
       </Typography>
       <Button
         variant="contained"
@@ -57,7 +51,7 @@ export const Approval = ({ selectedChain, amount, onApprovalComplete, address }:
         onClick={handleApprove}
         fullWidth
       >
-        Approve USDT
+        Approve Token
       </Button>
     </Box>
   );

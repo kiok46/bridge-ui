@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 import { ethers } from 'ethers';
 import { Transaction } from '../../../types';
-import { bridgeAbi } from '../../../constants';
+import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
 import { SUPPORTED_NETWORKS } from '../../../config/networks';
-
+import { TokenConfig } from '../../../types/tokens';
 interface WithdrawProps {
-  selectedChain: string;
+  selectedToken: TokenConfig;
   transaction: Transaction | null;
   bchAddress: string;
   evmAddress: string;
@@ -32,7 +32,7 @@ const useStartExit = (selectedChain: string, amount: string, transactionHash: st
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
       
       const claimTx = await bridgeContract.claim(amount, transactionHash);
       
@@ -49,17 +49,17 @@ const useStartExit = (selectedChain: string, amount: string, transactionHash: st
   return { startExitStatus, startedExitAmount, startExit };
 };
 
-export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }: WithdrawProps) => {
+export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }: WithdrawProps) => {
   const [amount, setAmount] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = ['Transfer to bridge contract', 'Start Exit', 'Waiting for approval', 'Process Exit'];
 
   const stepDescriptions = [
-    'Specify the amount of wUSDT you wish to withdraw. Ensure the amount is between 1 and 10000.',
-    'Start the exit process by moving your wUSDT to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
-    'Once the exit transaction is confirmed, you will need to wait for a specified period before you can claim your USDT on the selected network.',
-    'Claim your USDT on the selected network. Use the exit transaction hash issued in the previous step to receive your tokens.'
+    'Specify the amount of wrapped Token you wish to withdraw. Ensure the amount is between 1 and 10000.',
+    'Start the exit process by moving your wrapped Token to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
+    'Once the exit transaction is confirmed, you will need to wait for a specified period before you can claim your Token on the selected network.',
+    'Claim your Token on the selected network. Use the exit transaction hash issued in the previous step to receive your tokens.'
   ];
 
   const handleNext = () => {
@@ -97,7 +97,7 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
   };
 
   const { startExitStatus, startedExitAmount, startExit: startExitClaim } = useStartExit(
-    selectedChain,
+    selectedToken.chainId,
     transaction?.amount || '',
     transaction?.transactionHash || ''
   );
@@ -106,7 +106,7 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       const processExitTx = await bridgeContract.processExit(transaction!.exitId, transaction!.signature);
       await processExitTx.wait();
       console.log('Exit processed successfully');
@@ -120,7 +120,7 @@ export const Withdraw = ({ selectedChain, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       
       // First start the exit
       const startExitTx = await bridgeContract.startExit(transaction!.amount, transaction!.transactionHash);

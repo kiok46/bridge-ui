@@ -1,57 +1,56 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { USDT_ABI } from '../contracts/abis/USDT';
+import { TOKEN_ABI } from '../contracts/abis/Token';
 import { SUPPORTED_NETWORKS } from '../config/networks';
-import { USDT_ADDRESSES } from '../config/contracts';
-
-export const useApproval = (selectedChain: string, address: string) => {
+import { TokenConfig } from '../types/tokens';
+export const useApproval = (selectedToken: TokenConfig, address: string) => {
   const [isApproving, setIsApproving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getUSDTContract = useCallback(async () => {
+  const getTokenContract = useCallback(async () => {
     if (!window.ethereum || !address) return null;
     
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       return new ethers.Contract(
-        USDT_ADDRESSES[selectedChain],
-        USDT_ABI,
+        selectedToken.address,
+        TOKEN_ABI,
         signer
       );
     } catch (error) {
       console.error('Error getting USDT contract:', error);
       return null;
     }
-  }, [selectedChain, address]);
+  }, [selectedToken.address, address]);
 
   const checkAllowance = useCallback(async () => {
     try {
-      const contract = await getUSDTContract();
+      const contract = await getTokenContract();
       if (!contract || !address) return '0';
 
       const allowance = await contract.allowance(
         address,
-        SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE
+        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress
       );
       return ethers.formatUnits(allowance, 6); // USDT uses 6 decimals
     } catch (error) {
       console.error('Error checking allowance:', error);
       return '0';
     }
-  }, [getUSDTContract, address, selectedChain]);
+  }, [getTokenContract, address, selectedToken.chainId]);
 
   const approve = useCallback(async (amount: string) => {
     setIsApproving(true);
     setError(null);
     
     try {
-      const contract = await getUSDTContract();
+      const contract = await getTokenContract();
       if (!contract) throw new Error('Failed to get USDT contract');
 
       const amountInWei = ethers.parseUnits(amount, 6);
       const tx = await contract.approve(
-        SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE,
+        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress,
         amountInWei
       );
       await tx.wait();
@@ -62,7 +61,7 @@ export const useApproval = (selectedChain: string, address: string) => {
     } finally {
       setIsApproving(false);
     }
-  }, [getUSDTContract, selectedChain]);
+  }, [getTokenContract, selectedToken.chainId]);
 
   return { 
     checkAllowance, 

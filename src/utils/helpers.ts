@@ -1,12 +1,11 @@
 import { ethers } from 'ethers';
-import { USDT_DECIMALS } from './constants';
 
-export const formatAmount = (amount: string): string => {
-  return ethers.formatUnits(amount, USDT_DECIMALS);
+export const formatAmount = (amount: string, decimals: number): string => {
+  return ethers.formatUnits(amount, decimals);
 };
 
-export const parseAmount = (amount: string): bigint => {
-  return ethers.parseUnits(amount, USDT_DECIMALS);
+export const parseAmount = (amount: string, decimals: number): bigint => {
+  return ethers.parseUnits(amount, decimals);
 };
 
 export const shortenAddress = (address: string): string => {

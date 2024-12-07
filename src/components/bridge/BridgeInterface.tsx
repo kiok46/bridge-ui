@@ -3,12 +3,12 @@ import { Deposit } from './operations/Deposit';
 import { Withdraw } from './operations/Withdraw';
 import Transactions from './transactions/Transactions';
 import { Transaction } from '../../types';
-import { BalanceDisplay } from './BalanceDisplay';
+import { TokenConfig } from '../../types/tokens';
 
 interface BridgeInterfaceProps {
   direction: 'toBCH' | 'toEVM';
   setDirection: (direction: 'toBCH' | 'toEVM') => void;
-  selectedChain: string;
+  selectedToken: TokenConfig | null;
   activeDepositTransaction: Transaction | null;
   activeWithdrawTransaction: Transaction | null;
   depositTransactions: Transaction[];
@@ -25,7 +25,7 @@ interface BridgeInterfaceProps {
 export const BridgeInterface = ({
   direction,
   setDirection,
-  selectedChain,
+  selectedToken,
   activeDepositTransaction,
   activeWithdrawTransaction,
   depositTransactions,
@@ -90,7 +90,7 @@ export const BridgeInterface = ({
       {direction === 'toBCH' ? (
         <>
           <Deposit 
-            selectedChain={selectedChain}
+            selectedToken={selectedToken}
             transaction={activeDepositTransaction}
             bchAddress={bchAddress}
             evmAddress={evmAddress}
@@ -106,7 +106,7 @@ export const BridgeInterface = ({
       ) : (
         <>
           <Withdraw 
-            selectedChain={selectedChain}
+            selectedToken={selectedToken}
             transaction={activeWithdrawTransaction}
             bchAddress={bchAddress}
             evmAddress={evmAddress}

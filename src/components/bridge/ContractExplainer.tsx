@@ -3,16 +3,16 @@ import { Box, Typography, Divider } from '@mui/material';
 export const ContractExplainer = () => {
   const explainerContent = [
     {
-      title: 'USDT Contract Overview',
-      description: 'The USDT contract is a smart contract on the Ethereum blockchain that represents the Tether stablecoin. It allows users to hold and transfer USDT tokens, which are pegged to the value of the US dollar.'
+      title: 'Token Contract Overview',
+      description: 'The Token contract is a smart contract on the Ethereum blockchain that represents the Token. It allows users to hold and transfer Token, which are pegged to the value of the Token.'
     },
     {
       title: 'Key Functions',
-      description: 'The USDT contract includes functions such as transfer, approve, and transferFrom. These functions allow users to send USDT to others, approve third parties to spend their USDT, and transfer USDT on behalf of others.'
+      description: 'The Token contract includes functions such as transfer, approve, and transferFrom. These functions allow users to send USDT to others, approve third parties to spend their USDT, and transfer USDT on behalf of others.'
     },
     {
       title: 'Security Features',
-      description: 'The USDT contract includes security features such as pausing and blacklisting to protect users and the network. These features can be used to halt operations in case of emergencies or to prevent malicious activities.'
+      description: 'The Token contract includes security features such as pausing and blacklisting to protect users and the network. These features can be used to halt operations in case of emergencies or to prevent malicious activities.'
     }
   ];
 

@@ -2,9 +2,16 @@ import { Box, Typography, Stack, Button } from '@mui/material';
 import { ConnectButton } from '../ConnectButton';
 import { themeConstants } from '../../theme/constants';
 import { useWalletEVM } from '../../hooks/useWalletEVM';
+import { TokenConfig } from '../../types/tokens';
+import { useEffect } from 'react';
 
-export const EVMWallet = () => {
-  const { address, disconnect, network, connect, isInitializing } = useWalletEVM();
+export const EVMWallet = ({ selectedToken, onAddressUpdate }: { selectedToken: TokenConfig | null, onAddressUpdate: (address: string) => void }) => {
+  const { address, disconnect, network, connect, isInitializing } = useWalletEVM(selectedToken);
+
+
+  useEffect(() => {
+    onAddressUpdate(address);
+  }, [address]);
 
   return (
     <Stack spacing={2}>

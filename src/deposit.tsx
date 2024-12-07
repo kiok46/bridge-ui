@@ -1,7 +1,7 @@
 import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { bridgeAbi } from './constants';
+import { BRIDGE_ABI } from './contracts/abis/Bridge';
 import { SUPPORTED_NETWORKS } from './config/networks';
 
 export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
@@ -50,7 +50,7 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].contracts.BRIDGE, bridgeAbi, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
       
       const amountToBridge = ethers.parseUnits(activeTransaction.amount, 6);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, activeTransaction.bchAddress);
@@ -70,29 +70,29 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
     'Allowance', 
     'Approved', 
     'Switch to BCH', 
-    'Claim wUSDT'
+    'Claim wrapped token'
   ] : [
     'Enter amount', 
     'Allowance', 
     'Bridge', 
     'Waiting for approval', 
     'Switch to BCH', 
-    'Claim wUSDT'
+    'Claim wrapped token'
   ];
 
   const stepDescriptions = transaction?.claimNFTIssuanceTransactionHash ? [
-    'Specify the amount of wUSDT to bridge and provide your BCH address.',
+    'Specify the amount of wrapped token to bridge and provide your BCH address.',
     'Authorize the token amount that can be spent by the contract.',
     `Transaction approved. Claim NFT Issuance Transaction Hash: ${transaction?.claimNFTIssuanceTransactionHash}`,
     'Switch to the Bitcoin Cash network to complete the process.',
-    'Claim your wUSDT on the Bitcoin Cash network.'
+    'Claim your wrapped token on the Bitcoin Cash network.'
   ] : [
-    'Specify the amount of wUSDT to bridge and provide your BCH address.',
+    'Specify the amount of wrapped token to bridge and provide your BCH address.',
     'Authorize the token amount that can be spent by the contract.',
-    'Move your USDT to the Contract on the selected network.',
-    'A claimNFT will be issued to the provided BCH address, once the time has passed you can claim the wUSDT on the BCH network.',
+    'Move your wrapped token to the Contract on the selected network.',
+    'A claimNFT will be issued to the provided BCH address, once the time has passed you can claim the wrapped token on the BCH network.',
     'Switch to the Bitcoin Cash network to complete the process.',
-    'Claim your wUSDT on the Bitcoin Cash network.'
+    'Claim your wrapped token on the Bitcoin Cash network.'
   ];
 
   const handleNext = () => {
@@ -148,7 +148,7 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
               {index === 1 && (
                 <>
                   <Typography variant="body2" color="textSecondary">
-                    {ethers.parseUnits(activeTransaction.amount, 6) > approvedAmount ? 'Amount exceeds approved limit. Please approve more wUSDT.' : 'Amount is within approved limit.'} {approvedAmount}
+                    {ethers.parseUnits(activeTransaction.amount, 6) > approvedAmount ? 'Amount exceeds approved limit. Please approve more wrapped Token.' : 'Amount is within approved limit.'} {approvedAmount}
                   </Typography>
                 </>
               )}

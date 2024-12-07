@@ -12,7 +12,7 @@ export interface BridgeContract extends ethers.BaseContract {
   processExit: (exitId: bigint) => Promise<ethers.ContractTransactionResponse>;
 }
 
-export interface USDTContract extends ethers.BaseContract {
+export interface TokenContract extends ethers.BaseContract {
   approve: (spender: string, amount: bigint) => Promise<ethers.ContractTransactionResponse>;
   allowance: (owner: string, spender: string) => Promise<bigint>;
   balanceOf: (account: string) => Promise<bigint>;
