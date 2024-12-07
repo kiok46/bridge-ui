@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { TOKEN_ABI } from '../contracts/abis/Token';
-import { SUPPORTED_NETWORKS } from '../config/networks';
+import { SUPPORTED_CHAINS } from '../config/chains';
 import { TokenConfig } from '../types/tokens';
 
-export const useWalletEVM = (selectedToken: TokenConfig) => {
+export const useWalletEVM = (selectedToken: TokenConfig | null) => {
   const [address, setAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -113,39 +113,47 @@ export const useWalletEVM = (selectedToken: TokenConfig) => {
   }, [getProvider, address]);
 
   const approveToken = useCallback(async (amount: string) => {
+    if (!selectedToken) {
+      throw new Error('No token selected');
+    }
+
     try {
       const contract = await getTokenContract(selectedToken.address);
       if (!contract) throw new Error('Failed to get token contract');
 
-      const amountInWei = ethers.parseUnits(amount, 6);
+      const amountInWei = ethers.parseUnits(amount, selectedToken.decimals);
       const provider = getProvider();
       if (!provider) throw new Error('Provider not available');
 
       const signer = await provider.getSigner();
       // @ts-ignore
       const tx = await contract.connect(signer).approve(
-        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress,
+        SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress,
         amountInWei
       );
       await tx.wait();
     } catch (error) {
-      console.error('Error approving USDT:', error);
+      console.error('Error approving token:', error);
       throw error;
     }
-  }, [getTokenContract, getProvider]);
+  }, [getTokenContract, getProvider, selectedToken]);
 
   const getAllowance = useCallback(async (address: string, spender: string) => {
+    if (!selectedToken) {
+      throw new Error('No token selected');
+    }
+
     try {
       const contract = await getTokenContract(selectedToken.address);
       if (!contract) throw new Error('Failed to get token contract');
 
       const allowance = await contract.allowance(address, spender);
-      return ethers.formatUnits(allowance, 6);
+      return ethers.formatUnits(allowance, selectedToken.decimals);
     } catch (error) {
       console.error('Error getting allowance:', error);
       throw error;
     }
-  }, [getTokenContract]);
+  }, [getTokenContract, selectedToken]);
 
   return {
     address,

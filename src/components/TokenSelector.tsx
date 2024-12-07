@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { SUPPORTED_TOKENS, SUPPORTED_CHAINS, groupedTokens } from '../config/tokens';
+import { groupedTokens } from '../config/tokens';
+import { SUPPORTED_CHAINS } from '../config/chains';
 import type { TokenConfig } from '../types/tokens';
 import { themeConstants } from '../theme/constants';
 

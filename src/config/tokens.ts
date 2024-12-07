@@ -1,23 +1,6 @@
-import { TokenConfig, Chain } from '../types/tokens';
+import { TokenConfig } from '../types/tokens';
 import { ethers } from 'ethers';
-
-export const SUPPORTED_CHAINS: Chain[] = [
-  {
-    id: '1',
-    name: 'ETHEREUM',
-    icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=014'
-  },
-  {
-    id: '137',
-    name: 'POLYGON',
-    icon: 'https://cryptologos.cc/logos/polygon-matic-logo.svg?v=014'
-  },
-  {
-    id: '11155111',
-    name: 'SEPOLIA',
-    icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=014'
-  }
-];
+import { SUPPORTED_CHAINS } from './chains';
 
 // Helper function to get chain name
 const getChainName = (chainId: string): string => {
@@ -31,7 +14,7 @@ export const SUPPORTED_TOKENS: TokenConfig[] = [
     icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=014',
     chainId: '11155111',
     address: '0x0ea37B93D683FcD2BC50c0B365D4619f8bA10108',
-    decimals: 18,
+    decimals: 6,
     minAmount: ethers.parseUnits('0.01', 18).toString(),  // 0.01 TestToken
     maxAmount: ethers.parseUnits('1000', 18).toString()   // 1000 TestToken
   },

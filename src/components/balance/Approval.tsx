@@ -5,7 +5,7 @@ import { formatAmount } from '../../utils/helpers';
 import { TokenConfig } from '../../types/tokens';
 
 interface ApprovalProps {
-  selectedToken: TokenConfig;
+  selectedToken?: TokenConfig;
   amount: string;
   onApprovalComplete: () => void;
   address: string;
@@ -17,16 +17,18 @@ export const Approval = ({ selectedToken, amount, onApprovalComplete, address }:
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
+      if (!selectedToken) return;
       const allowance = await checkAllowance();
       setNeedsApproval(Number(amount) > Number(allowance));
     };
 
-    if (amount) {
+    if (amount && selectedToken) {
       checkApprovalNeeded();
     }
-  }, [amount, checkAllowance]);
+  }, [amount, checkAllowance, selectedToken]);
 
   const handleApprove = async () => {
+    if (!selectedToken) return;
     try {
       await approve(amount);
       setNeedsApproval(false);

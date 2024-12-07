@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { SUPPORTED_NETWORKS } from '../config/networks';
+import { SUPPORTED_CHAINS } from '../config/chains';
 import { TokenConfig } from '../types/tokens';
 
 export const useTokenBalance = (selectedToken: TokenConfig) => {
   const [tokenBalance, setTokenBalance] = useState('0');
 
   const fetchtokenBalance = async () => {
+    if (!selectedToken) return;
+
     try {
       if (!window.ethereum) {
         alert('Please install MetaMask!');
@@ -23,7 +25,7 @@ export const useTokenBalance = (selectedToken: TokenConfig) => {
         signer
       );
       
-      const balance = await tokenContract.balanceOf(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress);
+      const balance = await tokenContract.balanceOf(SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress);
       setTokenBalance(ethers.formatUnits(balance, selectedToken.decimals));
     } catch (error) {
       console.error('Error fetching token balance:', error);
@@ -32,8 +34,10 @@ export const useTokenBalance = (selectedToken: TokenConfig) => {
   };
 
   useEffect(() => {
-    fetchtokenBalance();
-  }, []);
+    if (selectedToken) {
+      fetchtokenBalance();
+    }
+  }, [selectedToken]);
 
   return tokenBalance;
 }; 

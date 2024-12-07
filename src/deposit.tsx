@@ -2,7 +2,7 @@ import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, T
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { BRIDGE_ABI } from './contracts/abis/Bridge';
-import { SUPPORTED_NETWORKS } from './config/networks';
+import { SUPPORTED_CHAINS } from './config/chains';
 
 export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -50,7 +50,7 @@ export const Deposit = ({ selectedChain, approvedAmount, transaction }) => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
       
       const amountToBridge = ethers.parseUnits(activeTransaction.amount, 6);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, activeTransaction.bchAddress);

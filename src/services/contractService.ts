@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { TOKEN_ABI } from '../contracts/abis/Token';
 import { BRIDGE_ABI } from '../contracts/abis/Bridge';
 import { BridgeContract, TokenContract } from '../contracts/interfaces';
-import { SUPPORTED_NETWORKS } from '../config/networks';
+import { SUPPORTED_CHAINS } from '../config/chains';
 
 export class ContractService {
   private provider: ethers.BrowserProvider;
@@ -18,7 +18,7 @@ export class ContractService {
   async connect() {
     if (!this.signer) {
       this.signer = await this.provider.getSigner();
-      const tokenAddress = SUPPORTED_NETWORKS[this.network].contracts.USDT;
+      const tokenAddress = SUPPORTED_CHAINS[this.network].contracts.USDT;
       this.tokenContract = new ethers.Contract(tokenAddress, TOKEN_ABI, this.signer);
     }
     return this.signer;
@@ -39,7 +39,7 @@ export class ContractService {
   }
 
   async getTokenContract(): Promise<TokenContract> {
-    const network = SUPPORTED_NETWORKS[this.network];
+    const network = SUPPORTED_CHAINS[this.network];
     if (!network) throw new Error('Unsupported network');
     
     return new ethers.Contract(
@@ -50,7 +50,7 @@ export class ContractService {
   }
 
   async getBridgeContract(): Promise<BridgeContract> {
-    const network = SUPPORTED_NETWORKS[this.network];
+    const network = SUPPORTED_CHAINS[this.network];
     if (!network) throw new Error('Unsupported network');
     
     return new ethers.Contract(

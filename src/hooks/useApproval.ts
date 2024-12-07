@@ -1,14 +1,15 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { TOKEN_ABI } from '../contracts/abis/Token';
-import { SUPPORTED_NETWORKS } from '../config/networks';
+import { SUPPORTED_CHAINS } from '../config/chains';
 import { TokenConfig } from '../types/tokens';
-export const useApproval = (selectedToken: TokenConfig, address: string) => {
+
+export const useApproval = (selectedToken: TokenConfig | undefined, address: string) => {
   const [isApproving, setIsApproving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getTokenContract = useCallback(async () => {
-    if (!window.ethereum || !address) return null;
+    if (!window.ethereum || !address || !selectedToken) return null;
     
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -19,49 +20,55 @@ export const useApproval = (selectedToken: TokenConfig, address: string) => {
         signer
       );
     } catch (error) {
-      console.error('Error getting USDT contract:', error);
+      console.error('Error getting token contract:', error);
       return null;
     }
-  }, [selectedToken.address, address]);
+  }, [selectedToken?.address, address]);
 
   const checkAllowance = useCallback(async () => {
+    if (!selectedToken) return '0';
+    
     try {
       const contract = await getTokenContract();
       if (!contract || !address) return '0';
 
       const allowance = await contract.allowance(
         address,
-        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress
+        SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress
       );
-      return ethers.formatUnits(allowance, 6); // USDT uses 6 decimals
+      return ethers.formatUnits(allowance, selectedToken.decimals);
     } catch (error) {
       console.error('Error checking allowance:', error);
       return '0';
     }
-  }, [getTokenContract, address, selectedToken.chainId]);
+  }, [getTokenContract, address, selectedToken]);
 
   const approve = useCallback(async (amount: string) => {
+    if (!selectedToken) {
+      throw new Error('No token selected');
+    }
+
     setIsApproving(true);
     setError(null);
     
     try {
       const contract = await getTokenContract();
-      if (!contract) throw new Error('Failed to get USDT contract');
+      if (!contract) throw new Error('Failed to get token contract');
 
-      const amountInWei = ethers.parseUnits(amount, 6);
+      const amountInWei = ethers.parseUnits(amount, selectedToken.decimals);
       const tx = await contract.approve(
-        SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress,
+        SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress,
         amountInWei
       );
       await tx.wait();
     } catch (error) {
-      console.error('Error approving USDT:', error);
+      console.error('Error approving token:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       throw error;
     } finally {
       setIsApproving(false);
     }
-  }, [getTokenContract, selectedToken.chainId]);
+  }, [getTokenContract, selectedToken]);
 
   return { 
     checkAllowance, 
@@ -69,4 +76,4 @@ export const useApproval = (selectedToken: TokenConfig, address: string) => {
     isApproving, 
     error 
   };
-}; 
+};

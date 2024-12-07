@@ -12,7 +12,7 @@ import {
 import { ethers } from 'ethers';
 import { Transaction } from '../../../types';
 import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
-import { SUPPORTED_NETWORKS } from '../../../config/networks';
+import { SUPPORTED_CHAINS } from '../../../config/chains';
 import { TokenConfig } from '../../../types/tokens';
 interface WithdrawProps {
   selectedToken: TokenConfig;
@@ -32,7 +32,7 @@ const useStartExit = (selectedChain: string, amount: string, transactionHash: st
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedChain].bridgeAddress, BRIDGE_ABI, signer);
       
       const claimTx = await bridgeContract.claim(amount, transactionHash);
       
@@ -106,7 +106,7 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       const processExitTx = await bridgeContract.processExit(transaction!.exitId, transaction!.signature);
       await processExitTx.wait();
       console.log('Exit processed successfully');
@@ -120,7 +120,7 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       
       // First start the exit
       const startExitTx = await bridgeContract.startExit(transaction!.amount, transaction!.transactionHash);

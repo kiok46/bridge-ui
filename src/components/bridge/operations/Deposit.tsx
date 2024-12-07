@@ -5,12 +5,12 @@ import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
 import { Transaction } from '../../../types';
 import { Approval } from '../../balance/Approval';
 import { useWalletEVM } from '../../../hooks/useWalletEVM';
-import { SUPPORTED_NETWORKS } from '../../../config/networks';
+import { SUPPORTED_CHAINS } from '../../../config/chains';
 import { TokenConfig } from '../../../types/tokens';
 
 interface DepositProps {
-  selectedToken: TokenConfig;
-  transaction: Transaction | null;
+  selectedToken?: TokenConfig;
+  transaction?: Transaction;
   bchAddress: string;
   evmAddress: string;
 }
@@ -26,17 +26,27 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
-      const allowance = await getAllowance(evmAddress, SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress);
-      console.log(Number(depositAmount), Number(allowance))
+      if (!selectedToken) return;
+      const chain = SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId);
+      if (!chain) {
+        console.error('Chain not found for chainId:', selectedToken.chainId);
+        return;
+      }
+      const allowance = await getAllowance(evmAddress, chain.bridgeAddress);
       setNeedsApproval(Number(depositAmount) > Number(allowance));
     };
 
-    if (depositAmount) {
+    if (depositAmount && selectedToken) {
       checkApprovalNeeded();
     }
-  }, [depositAmount, getAllowance]);
+  }, [depositAmount, getAllowance, selectedToken]);
 
   const handleApprove = async () => {
+    if (!selectedToken) {
+      alert('Please select a token first');
+      return;
+    }
+
     try {
       await approveToken(depositAmount.toString());
       setNeedsApproval(false);
@@ -48,13 +58,18 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
   };
 
   const bridge = async () => {
+    if (!selectedToken) {
+      alert('Please select a token first');
+      return;
+    }
+
     try {
       setBridgeStatus('pending');
       
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_NETWORKS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
       
       const amountToBridge = ethers.parseUnits(depositAmount.toString(), selectedToken.decimals);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, bchAddress);
@@ -106,6 +121,21 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
     'Switch to the Bitcoin Cash network using your wallet. This step is necessary to interact with the BCH network and claim your tokens.',
     'Claim your wrapped Token on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
   ];
+
+  if (!selectedToken) {
+    return (
+      <Box sx={{ 
+        backgroundColor: '#2C2F36',
+        padding: '2rem',
+        borderRadius: '12px',
+        textAlign: 'center'
+      }}>
+        <Typography variant="h6" sx={{ color: '#FFFFFF' }}>
+          Please select a token to continue
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box 
@@ -333,7 +363,7 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
         ))}
       </Stepper>
 
-      {needsApproval && (
+      {needsApproval && selectedToken && (
         <Approval 
           selectedToken={selectedToken}
           amount={depositAmount.toString()}

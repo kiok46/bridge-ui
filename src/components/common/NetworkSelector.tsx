@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { SUPPORTED_NETWORKS } from '../../config/networks';
+import { SUPPORTED_CHAINS } from '../../config/chains';
 
 interface NetworkSelectorProps {
   selectedChain: string;
@@ -15,7 +15,7 @@ export const NetworkSelector = ({ selectedChain, onNetworkChange }: NetworkSelec
         label="Network"
         onChange={(e) => onNetworkChange(e.target.value)}
       >
-        {Object.entries(SUPPORTED_NETWORKS).map(([key, network]) => (
+        {Object.entries(SUPPORTED_CHAINS).map(([key, network]) => (
           <MenuItem key={key} value={key}>
             {network.name}
           </MenuItem>

@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { SUPPORTED_NETWORKS } from '../config/networks';
+import { SUPPORTED_CHAINS } from '../config/chains';
 import { ERROR_MESSAGES } from './constants';
 
 export const switchNetwork = async (networkKey: string): Promise<boolean> => {
@@ -7,7 +7,7 @@ export const switchNetwork = async (networkKey: string): Promise<boolean> => {
     throw new Error(ERROR_MESSAGES.NO_WALLET);
   }
 
-  const network = SUPPORTED_NETWORKS[networkKey];
+  const network = SUPPORTED_CHAINS[networkKey];
   if (!network) {
     throw new Error('Unsupported network');
   }

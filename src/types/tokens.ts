@@ -13,4 +13,5 @@ export interface Chain {
   id: string;
   name: string;
   icon: string;
+  bridgeAddress: string;
 } 
