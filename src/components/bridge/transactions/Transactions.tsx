@@ -1,51 +1,151 @@
-import { Box, Button, Typography, CircularProgress, Paper } from '@mui/material';
-import { Transaction } from '../../../types';
-import { shortenAddress } from '../../../utils/helpers';
+import { Box, Button, Typography, CircularProgress, Paper, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Transaction, TransactionType } from '../../../types';
+import { useTransactions } from '../../../hooks/useTransactions';
+import { useState } from 'react';
+import { TransactionDetails, TransactionDetailsDialog } from './TransactionDetails';
 
 interface TransactionsProps {
-  transactions: Transaction[];
-  type: 'Deposit' | 'Withdrawal';
+  evmAddress: string;
+  bchAddress: string;
   onTransactionButtonClick: (transaction: Transaction) => void;
-  loading?: boolean;
+  onTransactionSelect?: (transaction: Transaction) => void;
 }
-
-const TransactionDetails = ({ transaction }: { transaction: Transaction }) => (
-  <Box mt={1}>
-    <Typography variant="body2" color="textSecondary">
-      Tx: {shortenAddress(transaction.transactionHash)}
-    </Typography>
-    <Typography variant="body2" color="textSecondary">
-      Amount: {transaction.amount} USDT
-    </Typography>
-    <Typography variant="caption" color="textSecondary">
-      Block: {transaction.blockNumber}
-    </Typography>
-  </Box>
-);
 
 const TransactionCard = ({ 
   transaction, 
-  onTransactionButtonClick 
+  onTransactionButtonClick,
+  onTransactionSelect 
 }: { 
   transaction: Transaction;
   onTransactionButtonClick: (transaction: Transaction) => void;
-}) => (
-  <Paper elevation={3} sx={{ mb: 2, p: 2 }}>
-    <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-      <TransactionDetails transaction={transaction} />
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={() => onTransactionButtonClick(transaction)}
-        sx={{ ml: 2 }}
-      >
-        View
-      </Button>
-    </Box>
-  </Paper>
-);
+  onTransactionSelect?: (transaction: Transaction) => void;
+}) => {
+  const [open, setOpen] = useState(false);
 
-const Transactions = ({ transactions, type, onTransactionButtonClick, loading = false }: TransactionsProps) => {
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSelect = () => {
+    if (onTransactionSelect) {
+      onTransactionSelect(transaction);
+      handleClose();
+    }
+  };
+
+  const handleInspect = () => {
+    onTransactionButtonClick(transaction);
+    handleClose();
+  };
+
+  return (
+    <>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          mb: 1.5, 
+          p: 1.5,
+          backgroundColor: '#262933',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(182, 80, 158, 0.15)',
+            cursor: 'pointer'
+          },
+          height: '60px',
+        }}
+        onClick={handleOpen}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          width: '100%',
+          height: '100%'
+        }}>
+          <TransactionDetails 
+            transaction={transaction} 
+            explorerUrl={'https://bch.loping.net/tx/'}
+          /> 
+        </Box>
+      </Paper>
+
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#08090A',
+            backgroundImage: 'none',
+            boxShadow: '0px 4px 24px rgba(0, 0, 0, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }
+        }}
+      >
+        <DialogTitle 
+          sx={{ 
+            backgroundColor: '#0A0B0D',
+            color: '#F1F1F3',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+            p: 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <Typography sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
+            Transaction Details
+          </Typography>
+          <IconButton
+            onClick={handleClose}
+            sx={{
+              color: '#6E7177',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: '#F1F1F3'
+              }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent 
+          sx={{ 
+            backgroundColor: '#0A0B0D',
+            p: '0 !important'
+          }}
+        >
+          <TransactionDetailsDialog 
+            transaction={transaction} 
+            explorerUrl={'https://bch.loping.net/tx/'}
+            onSelect={onTransactionSelect ? handleSelect : undefined}
+            onInspect={handleInspect}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+const Transactions = ({ 
+  evmAddress, 
+  bchAddress, 
+  onTransactionButtonClick,
+  onTransactionSelect
+}: TransactionsProps) => {
+  const { loading, deposits, withdrawals } = useTransactions(evmAddress, bchAddress);
+  const transactions: Transaction[] = [
+    ...deposits.map(tx => ({...tx, type: 'Deposit' as TransactionType})),
+    ...withdrawals.map(tx => ({...tx, type: 'Withdrawal' as TransactionType}))
+  ];
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" p={2}>
@@ -58,26 +158,64 @@ const Transactions = ({ transactions, type, onTransactionButtonClick, loading = 
     return (
       <Box p={2}>
         <Typography variant="body2" color="textSecondary" align="center">
-          No {type.toLowerCase()} transactions found
+          No transactions found
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        {type} Transactions
+    <Box sx={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      maxHeight: '400px'
+    }}>
+      <Typography 
+        variant="h6" 
+        gutterBottom 
+        sx={{ 
+          mb: 2,
+          fontSize: '1.1rem',
+          fontWeight: 500,
+          color: '#F1F1F3'
+        }}
+      >
+        Previous Transactions
       </Typography>
-      {transactions.map((transaction) => (
-        <TransactionCard
-          key={transaction.id}
-          transaction={transaction}
-          onTransactionButtonClick={onTransactionButtonClick}
-        />
-      ))}
+      <Box sx={{ 
+        overflow: 'auto', 
+        flex: 1,
+        mr: -1, 
+        pr: 1,
+        pb: 2,
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '4px',
+          '&:hover': {
+            background: 'rgba(255, 255, 255, 0.15)',
+          },
+        },
+        maxHeight: 'calc(300px)',
+      }}>
+        {transactions.map((transaction) => (
+          <TransactionCard
+            key={transaction.id}
+            transaction={transaction}
+            onTransactionButtonClick={onTransactionButtonClick}
+            onTransactionSelect={onTransactionSelect}
+          />
+        ))}
+      </Box>
     </Box>
   );
 };
 
-export default Transactions; 
+export default Transactions;

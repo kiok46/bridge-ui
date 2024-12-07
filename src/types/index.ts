@@ -2,18 +2,22 @@ export interface Transaction {
   id: string;
   type: 'Deposit' | 'Withdrawal';
   amount: string;
-  chainId: string;
-  blockNumber: number;
-  address: string;
+  transactionHash?: string;
+  chainId?: string;
+  blockNumber?: string;
+  address?: string;
   data?: string;
-  transactionHash: string;
   claimNFTIssuanceTransactionHash?: string;
   claimNFTBurnTransactionHash?: string;
   exitId?: string;
   exitIdTransactionHash?: string;
   processExitTransactionHash?: string;
   signature?: string;
+  createdAt: number; // Unix timestamp in seconds
+  status: 'pending' | 'completed' | 'failed';
 }
+
+export type TransactionType = 'Deposit' | 'Withdrawal';
 
 export interface WalletState {
   userEVMAddress: string;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '../types';
 import { fetchTransactions } from '../services/api';
 
@@ -6,25 +6,42 @@ export const useTransactions = (evmAddress: string, bchAddress: string) => {
   const [deposits, setDeposits] = useState<Transaction[]>([]);
   const [withdrawals, setWithdrawals] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        const { deposits, withdrawals } = await fetchTransactions(evmAddress, bchAddress);
-        setDeposits(deposits);
-        setWithdrawals(withdrawals);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadTransactions = useCallback(async () => {
+    if (!evmAddress && !bchAddress) {
+      setLoading(false);
+      return;
+    }
 
-    if (evmAddress || bchAddress) {
-      loadTransactions();
+    try {
+      setLoading(true);
+      setError(null);
+      const { deposits: newDeposits, withdrawals: newWithdrawals } = await fetchTransactions(evmAddress, bchAddress);
+      
+      // Sort transactions by creation date in descending order (newest first)
+      setDeposits(newDeposits.sort((a, b) => b.createdAt - a.createdAt));
+      setWithdrawals(newWithdrawals.sort((a, b) => b.createdAt - a.createdAt));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load transactions');
+    } finally {
+      setLoading(false);
     }
   }, [evmAddress, bchAddress]);
 
-  return { deposits, withdrawals, loading, error };
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  const refresh = useCallback(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  return { 
+    deposits, 
+    withdrawals, 
+    loading, 
+    error,
+    refresh 
+  };
 }; 

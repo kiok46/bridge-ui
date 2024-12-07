@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle, Paper } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
@@ -10,6 +10,7 @@ import { ContractExplainer } from './components/bridge/ContractExplainer';
 import { TopNavBar } from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
 import { TokenConfig } from './types/tokens';
+import Transactions from './components/bridge/transactions/Transactions';
 
 export const App = () => {
   const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
@@ -156,6 +157,30 @@ export const App = () => {
             </Grid>
           </Grid>
 
+          <Box sx={{ mb: 4 }}>
+            {/* <Paper
+              elevation={3}
+              sx={{
+                padding: '1.25rem',
+                height: '400px',
+                backgroundColor: '#1B2030',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                color: '#FFFFFF',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            > */}
+              <Transactions 
+                evmAddress={evmAddress}
+                bchAddress={bchAddress}
+                onTransactionButtonClick={handleTransactionButtonClick}
+              />
+            {/* </Paper> */}
+          </Box>
+
           <Box
             sx={{
               position: 'relative',
@@ -188,11 +213,6 @@ export const App = () => {
                 activeWithdrawTransaction={activeWithdrawTransaction}
                 depositTransactions={depositTransactions}
                 withdrawalTransactions={withdrawalTransactions}
-                onTransactionButtonClick={handleTransactionButtonClick}
-                onReset={handleReset}
-                amount={amount}
-                needsApproval={needsApproval}
-                setNeedsApproval={setNeedsApproval}
                 bchAddress={bchAddress}
                 evmAddress={evmAddress}
               />
