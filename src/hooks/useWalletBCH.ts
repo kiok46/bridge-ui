@@ -115,21 +115,7 @@ export const useWalletBCH = () => {
     }
 
     try {
-      // Clean up existing session if present
-      if (lastSession) {
-        try {
-          await signClient.disconnect({
-            topic: lastSession.topic,
-            reason: { code: 6000, message: "User disconnected" }
-          });
-        } catch (e) {
-          // Ignore any disconnect errors
-          console.log("Previous session cleanup:", e?.message || "Failed");
-        } finally {
-          setSession(null);
-        }
-      }
-
+      // Remove the automatic disconnect code and just proceed with connection
       const { uri, approval } = await signClient.connect({
         requiredNamespaces: namespaces,
         optionalNamespaces: namespaces
