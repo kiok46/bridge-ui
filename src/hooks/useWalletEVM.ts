@@ -19,6 +19,14 @@ export const useWalletEVM = (selectedToken: TokenConfig | null) => {
           const signer = await provider.getSigner();
           const address = await signer.getAddress();
           const network = await provider.getNetwork();
+          const chainId = network.chainId.toString();
+
+          // Check if chain is supported
+          if (!SUPPORTED_CHAINS.some(chain => chain.id === chainId)) {
+            console.error('Unsupported chain');
+            return;
+          }
+
           setAddress(address);
           setNetwork(network.name);
           setIsConnected(true);
@@ -30,6 +38,36 @@ export const useWalletEVM = (selectedToken: TokenConfig | null) => {
     };
 
     checkConnection();
+  }, []);
+
+  // Listen for chain changes
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    const handleChainChanged = async (chainId: string) => {
+      // Convert chainId to decimal string if it's in hex
+      const normalizedChainId = chainId.startsWith('0x') ? 
+        parseInt(chainId, 16).toString() : 
+        chainId;
+
+      if (!SUPPORTED_CHAINS.some(chain => chain.id === normalizedChainId)) {
+        setAddress(null);
+        setNetwork(null);
+        setIsConnected(false);
+        alert('Please switch to a supported network');
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const network = await provider.getNetwork();
+      setNetwork(network.name);
+    };
+
+    window.ethereum.on('chainChanged', handleChainChanged);
+
+    return () => {
+      window.ethereum.removeListener('chainChanged', handleChainChanged);
+    };
   }, []);
 
   const connect = useCallback(async () => {
@@ -46,6 +84,14 @@ export const useWalletEVM = (selectedToken: TokenConfig | null) => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
       const network = await provider.getNetwork();
+      const chainId = network.chainId.toString();
+
+      // Check if chain is supported
+      if (!SUPPORTED_CHAINS.some(chain => chain.id === chainId)) {
+        alert('Please switch to a supported network');
+        setIsInitializing(false);
+        return;
+      }
       
       setAddress(address);
       setNetwork(network.name);
@@ -128,7 +174,7 @@ export const useWalletEVM = (selectedToken: TokenConfig | null) => {
       const signer = await provider.getSigner();
       // @ts-ignore
       const tx = await contract.connect(signer).approve(
-        SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress,
+        SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress,
         amountInWei
       );
       await tx.wait();

@@ -59,7 +59,6 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
 
   const bridge = async () => {
     if (!selectedToken) {
-      alert('Please select a token first');
       return;
     }
 
@@ -69,7 +68,8 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeAddress = SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress;
+      const bridgeContract = new ethers.Contract(bridgeAddress, BRIDGE_ABI, signer);
       
       const amountToBridge = ethers.parseUnits(depositAmount.toString(), selectedToken.decimals);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, bchAddress);

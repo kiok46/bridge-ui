@@ -19,13 +19,15 @@ export const useTokenBalance = (selectedToken: TokenConfig) => {
       const signer = await provider.getSigner();
       
       const tokenAbi = ["function balanceOf(address account) public view returns (uint256)"];
+
       const tokenContract = new ethers.Contract(
         selectedToken.address, 
         tokenAbi, 
         signer
       );
-      
+
       const balance = await tokenContract.balanceOf(SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress);
+
       setTokenBalance(ethers.formatUnits(balance, selectedToken.decimals));
     } catch (error) {
       console.error('Error fetching token balance:', error);
