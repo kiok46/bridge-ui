@@ -3,11 +3,11 @@ import { Box, Typography, Stack } from '@mui/material';
 import { themeConstants } from '../../theme/constants';
 import { useWalletBCH } from '../../hooks/useWalletBCH';
 import { ConnectButton } from '../ConnectButton';
+import { useElectrum } from '../../hooks/useElectrum';
 
 interface BCHWalletProps {
   onAddressUpdate: (address: string) => void;
 }
-
 export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
   const { 
     address, 
@@ -16,8 +16,16 @@ export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
     disconnect 
   } = useWalletBCH();
 
+  const { fetchUTXOs } = useElectrum();
+
   useEffect(() => {
     onAddressUpdate(address);
+    console.log('address:', address);
+    const getUTXOs = async () => {
+      const utxos = await fetchUTXOs(address);
+      console.log('utxos:', utxos);
+    };
+    getUTXOs();
   }, [address]);
 
   return (
