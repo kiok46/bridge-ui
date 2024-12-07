@@ -13,7 +13,8 @@ export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
     address, 
     isInitializing, 
     connect, 
-    disconnect 
+    disconnect,
+    signTransaction
   } = useWalletBCH();
 
   const { fetchUTXOs } = useElectrum();
@@ -137,6 +138,8 @@ export const BCHWallet: React.FC<BCHWalletProps> = ({ onAddressUpdate }) => {
               ? "Initializing..."
               : "Connect to BCH Network"}
           </ConnectButton>
+
+          
         </Box>
       )}
     </Stack>

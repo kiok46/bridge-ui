@@ -1,5 +1,6 @@
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
+import { stringify } from "@bitauth/libauth"
 import { useState, useEffect } from 'react';
 
 const projectId = 'bcf35dc8f8757c1b15883b9161a6c8bf';
@@ -167,6 +168,24 @@ export const useWalletBCH = () => {
     }
   };
 
+  const signTransaction = async (options) => {
+    try {
+      console.log('signing transaction', options);
+      const result = await signClient.request({
+        chainId: connectedChain,
+        topic: lastSession.topic,
+        request: {
+          method: "bch_signTransaction",
+          params: JSON.parse(stringify(options)),
+        },
+      });
+  
+      return result;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
   const getUserAddress = async () => {
     if (!signClient || !lastSession) return;
 
@@ -208,6 +227,7 @@ export const useWalletBCH = () => {
     isInitializing,
     isConnected: !!lastSession,
     connect,
-    disconnect
+    disconnect,
+    signTransaction
   };
 }; 

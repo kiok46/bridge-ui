@@ -1,6 +1,8 @@
 import { ElectrumClient } from '@electrum-cash/network';
 import { fetchUnspentTransactionOutputs } from '@electrum-cash/protocol';
-
+import {Contract} from "cashscript"
+import BRIDGE_ABI from '../contracts/abis/bch/bridge';
+import ISSUER_ABI from '../contracts/abis/bch/issuer';
 
 interface UTXO {
   txid: string;
