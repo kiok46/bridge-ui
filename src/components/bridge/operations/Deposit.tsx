@@ -11,16 +11,14 @@ interface DepositProps {
   transaction?: Transaction;
   connectedBchAddress: string;
   connectedEvmAddress: string;
+  onTransactionUpdate: (transaction: Transaction) => void;
 }
 
-export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress }: DepositProps) => {
+export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress, onTransactionUpdate }: DepositProps) => {
   const [activeStep, setActiveStep] = useState(0);
   const [bridgeStatus, setBridgeStatus] = useState<TransactionStatus>(TransactionStatus.PENDING);
-  const [bridgedAmount, setBridgedAmount] = useState<string | null>(null);
   const [needsApproval, setNeedsApproval] = useState(false);
   const { getAllowance, approveToken } = useWalletEVM(transaction?.tokenConfig);
-  
-  const [depositAmount, setDepositAmount] = useState<number>(transaction?.amount || 1);
 
   // Reset state when transaction changes
   useEffect(() => {
@@ -36,9 +34,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
     }
     setActiveStep(step);
     setBridgeStatus(TransactionStatus.PENDING);
-    setBridgedAmount(null);
     setNeedsApproval(false);
-    setDepositAmount(1);
   }, [transaction]);
 
   useEffect(() => {
@@ -50,13 +46,13 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
         return;
       }
       const allowance = await getAllowance(connectedEvmAddress, chain.bridgeAddress);
-      setNeedsApproval(Number(depositAmount) > Number(allowance));
+      setNeedsApproval(Number(transaction.amount) > Number(allowance));
     };
 
-    if (depositAmount && transaction?.tokenConfig) {
+    if (transaction?.amount && transaction?.tokenConfig) {
       checkApprovalNeeded();
     }
-  }, [depositAmount, getAllowance, transaction?.tokenConfig]);
+  }, [transaction?.amount, getAllowance, transaction?.tokenConfig]);
 
   const handleApprove = async () => {
     if (!transaction?.tokenConfig) {
@@ -65,7 +61,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
     }
 
     try {
-      await approveToken(depositAmount.toString());
+      await approveToken(transaction.amount.toString());
       setNeedsApproval(false);
       handleNext();
     } catch (error) {
@@ -88,12 +84,11 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
       const bridgeAddress = SUPPORTED_CHAINS.find(chain => chain.id === transaction.tokenConfig.chainId)?.bridgeAddress;
       const bridgeContract = new ethers.Contract(bridgeAddress, BRIDGE_ABI, signer);
       
-      const amountToBridge = ethers.parseUnits(depositAmount.toString(), transaction.tokenConfig.decimals);
+      const amountToBridge = ethers.parseUnits(transaction.amount.toString(), transaction.tokenConfig.decimals);
       const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, connectedBchAddress);
       
       await bridgeTx.wait();
       setBridgeStatus(TransactionStatus.COMPLETED);
-      setBridgedAmount(depositAmount.toString());
       handleNext();
     } catch (error) {
       console.error('Bridge error:', error);
@@ -116,7 +111,10 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
     if (/^\d+$/.test(value)) {
       const numValue = parseInt(value);
       if (numValue >= 1 && numValue <= 10000) {
-        setDepositAmount(numValue);
+        onTransactionUpdate({
+          ...transaction,
+          amount: numValue
+        });
       }
     }
   };
@@ -223,8 +221,9 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                   <TextField
                     type="text"
                     label="Enter amount (1-10000)"
-                    value={depositAmount}
+                    value={transaction?.amount}
                     onChange={handleAmountChange}
+                    disabled={!!transaction?.id}
                     inputProps={{ 
                       pattern: "\\d*",
                       inputMode: "numeric"
@@ -414,7 +413,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                   variant="outlined"
                   onClick={handleNext}
                   disabled={
-                    (activeStep === 0 && (!depositAmount || !transaction?.data)) ||
+                    (activeStep === 0 && (!transaction?.amount || !transaction?.data)) ||
                     (activeStep === 1 && needsApproval) ||
                     (activeStep === 2 && !transaction?.transactionHash) ||
                     (activeStep === 3 && !transaction?.claimNFTIssuanceTransactionHash) ||

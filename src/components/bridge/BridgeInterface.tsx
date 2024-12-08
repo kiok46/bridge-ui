@@ -7,12 +7,14 @@ interface BridgeInterfaceProps {
   activeTransaction: Transaction | null;
   connectedBchAddress: string;
   connectedEvmAddress: string;
+  onTransactionUpdate: (transaction: Transaction) => void;
 }
 
 export const BridgeInterface = ({
   activeTransaction,
   connectedBchAddress,
-  connectedEvmAddress
+  connectedEvmAddress,
+  onTransactionUpdate
 }: BridgeInterfaceProps) => {
 
   return (
@@ -47,6 +49,7 @@ export const BridgeInterface = ({
               transaction={activeTransaction}
               connectedBchAddress={connectedBchAddress}
               connectedEvmAddress={connectedEvmAddress}
+              onTransactionUpdate={onTransactionUpdate}
             />
           ) : (
             <Withdraw 

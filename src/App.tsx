@@ -55,6 +55,48 @@ export const App = () => {
     }
   };
 
+
+  const onTransactionUpdate = (transaction: Transaction) => {
+    setActiveTransaction(prevTransaction => ({
+      ...prevTransaction,
+      ...transaction
+    }));
+  };
+
+  const onBCHAddressUpdate = (address: string) => {
+    setConnectedBchAddress(address);
+    if(activeTransaction.type === TransactionType.DEPOSIT){
+      setActiveTransaction(prevTransaction => ({
+        ...prevTransaction,
+        data: address
+      }));
+    }
+
+    if(activeTransaction.type === TransactionType.WITHDRAWAL){
+      setActiveTransaction(prevTransaction => ({
+        ...prevTransaction,
+        address: address
+      }));
+    }
+  };
+
+  const onEVMAddressUpdate = (address: string) => {
+    setConnectedEvmAddress(address);
+    if(activeTransaction.type === TransactionType.DEPOSIT){
+      setActiveTransaction(prevTransaction => ({
+        ...prevTransaction,
+        address: address
+      }));
+    }
+
+    if(activeTransaction.type === TransactionType.WITHDRAWAL){
+      setActiveTransaction(prevTransaction => ({
+        ...prevTransaction,
+        data: address
+      }));
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -150,7 +192,7 @@ export const App = () => {
                   }
                 }}
               >
-                <EVMWallet tokenConfig={activeTransaction.tokenConfig} onAddressUpdate={setConnectedEvmAddress} />
+                <EVMWallet tokenConfig={activeTransaction.tokenConfig} onAddressUpdate={onEVMAddressUpdate} />
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -168,7 +210,7 @@ export const App = () => {
                   }
                 }}
               >
-                <BCHWallet onAddressUpdate={setConnectedBchAddress} />
+                <BCHWallet onAddressUpdate={onBCHAddressUpdate} />
               </Box>
             </Grid>
           </Grid>
@@ -219,6 +261,7 @@ export const App = () => {
                 activeTransaction={activeTransaction}
                 connectedBchAddress={connectedBchAddress}
                 connectedEvmAddress={connectedEvmAddress}
+                onTransactionUpdate={onTransactionUpdate}
               />
             </Box>
           </Box>
