@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
+import { decodeCashAddress, encodeCashAddress } from '@bitauth/libauth';
 import { SUPPORTED_TOKENS } from '../config/tokens';
 import { Transaction } from '../types';
+
 
 export const formatAmount = (amount: string, decimals: number): string => {
   return ethers.formatUnits(amount, decimals);
@@ -51,3 +53,29 @@ export const getFormattedAmount = (transaction: Transaction) => {
   }
   return transaction.amount;
 };
+
+export const toTokenAddress = (address: string) => {
+  const addressInfo = decodeCashAddress(address);
+  // @ts-ignore
+  const pkhPayoutBin = addressInfo.payload;
+  const prefix = "bitcoincash";
+  const tokendata = encodeCashAddress({prefix, payload: pkhPayoutBin, type: "p2pkhWithTokens"});
+  return tokendata.address;
+}
+
+export function reverseClaimCommitment(claimCommitment: string) {
+  // Split the claimCommitment into two parts
+  const amountHex = claimCommitment.slice(0, 16);
+  const locktimeHex = claimCommitment.slice(16);
+
+  // Function to reverse byte pairs and convert to integer
+  const reverseAndConvert = (hexString) => {
+    return BigInt('0x' + hexString.match(/.{2}/g).reverse().join(''));
+  };
+
+  // Reverse and convert each part
+  const amount = reverseAndConvert(amountHex);
+  const locktime = reverseAndConvert(locktimeHex);
+
+  return { amount, locktime };
+}

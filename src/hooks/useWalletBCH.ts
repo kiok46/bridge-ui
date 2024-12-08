@@ -179,9 +179,12 @@ export const useWalletBCH = () => {
           params: JSON.parse(stringify(options)),
         },
       });
+
+      console.log('signed transaction', result);
   
       return result;
     } catch (error) {
+      console.log('error signing transaction', error);
       return undefined;
     }
   }
