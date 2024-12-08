@@ -6,6 +6,7 @@ import { Transaction, TransactionStatus } from '../../../types';
 import { Approval } from '../../balance/Approval';
 import { useWalletEVM } from '../../../hooks/useWalletEVM';
 import { SUPPORTED_CHAINS } from '../../../config/chains';
+import { useElectrum } from '../../../hooks/useElectrum';
 
 interface DepositProps {
   transaction?: Transaction;
@@ -19,6 +20,8 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
   const [bridgeStatus, setBridgeStatus] = useState<TransactionStatus>(TransactionStatus.PENDING);
   const [needsApproval, setNeedsApproval] = useState(false);
   const { getAllowance, approveToken } = useWalletEVM(transaction?.tokenConfig);
+  const { claimToken } = useElectrum();
+
 
   // Reset state when transaction changes
   useEffect(() => {
@@ -69,6 +72,11 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
       alert('Error during approval: ' + (error as Error).message);
     }
   };
+
+  const claimTokenHandler = async () => {
+    if (!transaction) return;
+    await claimToken(transaction);
+  }
 
   const bridge = async () => {
     if (!transaction?.tokenConfig) {
@@ -341,7 +349,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
                 </>
               )}
 
-              {index === 3 && (
+              {index === 3 && !needsApproval && (
                 <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -370,19 +378,35 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
                 </Box>
               )}
 
+              {index === 3 && needsApproval && (
+                <Approval 
+                  tokenConfig={transaction.tokenConfig}
+                  amount={transaction.amount.toString()}
+                  onApprovalComplete={() => setNeedsApproval(false)}
+                  address={connectedEvmAddress}
+                />
+              )}
+
               {index === 4 && (
-                <Typography>
-                  Switch to BCH
-                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={claimTokenHandler}
+                  sx={{
+                    borderColor: '#FFFFFF',
+                    color: '#FFFFFF',
+                    '&:hover': {
+                      borderColor: '#2EBAC6',
+                      backgroundColor: 'transparent',
+                    },
+                    borderRadius: '12px',
+                    padding: '0.5rem 1.5rem',
+                  }}
+                >
+                  Claim token
+                </Button>
               )}
 
               {index === 5 && (
-                <Typography>
-                  Claim wrapped token
-                </Typography>
-              )}
-
-              {index === 6 && (
                 <Typography>
                   Success!
                 </Typography>
@@ -443,15 +467,6 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
           </Step>
         ))}
       </Stepper>
-
-      {needsApproval && transaction?.tokenConfig && (
-        <Approval 
-          tokenConfig={transaction.tokenConfig}
-          amount={transaction.amount.toString()}
-          onApprovalComplete={() => setNeedsApproval(false)}
-          address={connectedEvmAddress}
-        />
-      )}
 
       {transaction.claimNFTBurnTransactionHash && (
         <Alert 
