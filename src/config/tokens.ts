@@ -9,9 +9,9 @@ const getChainName = (chainId: string): string => {
 
 export const SUPPORTED_TOKENS: TokenConfig[] = [
   {
-    symbol: 'TestToken',
-    name: `TestToken on ${getChainName('11155111')}`,
-    icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=014',
+    symbol: 'USDT',
+    name: `USDT on ${getChainName('11155111')}`,
+    icon: 'https://cryptologos.cc/logos/tether-usdt-logo.svg?v=014',
     chainId: '11155111',
     address: '0x0ea37B93D683FcD2BC50c0B365D4619f8bA10108',
     decimals: 6,

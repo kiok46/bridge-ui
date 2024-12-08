@@ -1,6 +1,6 @@
 import { Box, Typography, Link, Chip, Button } from '@mui/material';
 import { Transaction } from '../../../types';
-import { shortenAddress } from '../../../utils/helpers';
+import { shortenAddress, getFormattedAmount } from '../../../utils/helpers';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -26,6 +26,9 @@ export const TransactionDetails = ({ transaction, explorerUrl, onInspect }: Tran
     }
     return <Chip label="Pending" sx={{ backgroundColor: '#ffa726', color: 'white' }} />;
   };
+
+
+
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ 
@@ -39,7 +42,7 @@ export const TransactionDetails = ({ transaction, explorerUrl, onInspect }: Tran
             Block {transaction.blockNumber || 'Pending'}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 'medium', color: '#F1F1F3' }}>
-            {transaction.amount} USDT
+            {getFormattedAmount(transaction)} {transaction.asset}
           </Typography>
           <Typography variant="body2" sx={{ color: '#9BA1B3' }}>
             {shortenAddress(transaction.address || '')}
@@ -80,6 +83,7 @@ export const TransactionDetailsDialog = ({
   onSelect?: () => void;
   onInspect?: () => void;
 }) => {
+
   return (
     <Box sx={{ 
       p: 4, 
@@ -139,7 +143,7 @@ export const TransactionDetailsDialog = ({
           />
           <DetailItem 
             label="Amount" 
-            value={`${transaction.amount} USDT`} 
+            value={`${getFormattedAmount(transaction)} ${transaction.asset}`} 
           />
           <DetailItem 
             label="Block Number" 

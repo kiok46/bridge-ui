@@ -15,6 +15,7 @@ export interface Transaction {
   signature?: string;
   createdAt: number; // Unix timestamp in seconds
   status: 'pending' | 'completed' | 'failed';
+  asset: string;
 }
 
 export type TransactionType = 'Deposit' | 'Withdrawal';

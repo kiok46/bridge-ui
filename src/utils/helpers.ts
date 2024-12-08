@@ -1,4 +1,6 @@
 import { ethers } from 'ethers';
+import { SUPPORTED_TOKENS } from '../config/tokens';
+import { Transaction } from '../types';
 
 export const formatAmount = (amount: string, decimals: number): string => {
   return ethers.formatUnits(amount, decimals);
@@ -37,3 +39,15 @@ export const formatDate = (timestamp: number | string) => {
     minute: '2-digit'
   });
 }; 
+
+export const getFormattedAmount = (transaction: Transaction) => {
+  const token = SUPPORTED_TOKENS.find(t => 
+    t.symbol.toLowerCase() === transaction.asset.toLowerCase() && 
+    t.chainId === transaction.chainId.toString()
+  );
+
+  if (token) {
+    return ethers.formatUnits(transaction.amount, token.decimals);
+  }
+  return transaction.amount;
+};
