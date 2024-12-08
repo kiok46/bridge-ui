@@ -4,14 +4,12 @@ import { Withdraw } from './operations/Withdraw';
 import { Transaction, TransactionType } from '../../types';
 
 interface BridgeInterfaceProps {
-  direction: TransactionType;
   activeTransaction: Transaction | null;
   connectedBchAddress: string;
   connectedEvmAddress: string;
 }
 
 export const BridgeInterface = ({
-  direction,
   activeTransaction,
   connectedBchAddress,
   connectedEvmAddress
@@ -44,7 +42,7 @@ export const BridgeInterface = ({
             gap: 2
           }}
         >
-          {direction === TransactionType.DEPOSIT ? (
+          {activeTransaction.type === TransactionType.DEPOSIT ? (
             <Deposit 
               transaction={activeTransaction}
               connectedBchAddress={connectedBchAddress}

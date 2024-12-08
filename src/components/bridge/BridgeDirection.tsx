@@ -1,17 +1,17 @@
 import { Box, Button, Alert } from '@mui/material';
 import { Transaction, TransactionType } from '../../types';
-import { useState } from 'react';
 
 interface BridgeDirectionProps {
   activeTransaction: Transaction | null;
   onReset: () => void;
+  onDirectionChange: (direction: TransactionType) => void;
 }
 
 export const BridgeDirection = ({
   activeTransaction,
-  onReset
+  onReset,
+  onDirectionChange
 }: BridgeDirectionProps) => {
-  const [direction, setDirection] = useState<TransactionType>(TransactionType.DEPOSIT);
 
   return (
   <>
@@ -48,17 +48,17 @@ export const BridgeDirection = ({
       </Box>
     )}
 
-    {!activeTransaction && (
+    {!activeTransaction.id && (
       <Box display="flex" justifyContent="center" mb={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
         <Button 
-          variant={direction === TransactionType.DEPOSIT ? 'contained' : 'outlined'}
-          onClick={() => setDirection(TransactionType.DEPOSIT)}
+          variant={activeTransaction.type === TransactionType.DEPOSIT ? 'contained' : 'outlined'}
+          onClick={() => onDirectionChange(TransactionType.DEPOSIT)}
           sx={{ 
-            backgroundColor: direction === TransactionType.DEPOSIT ? '#B6509E' : 'transparent',
-            color: direction === TransactionType.DEPOSIT ? '#ffffff' : '#B6509E',
+            backgroundColor: activeTransaction.type === TransactionType.DEPOSIT ? '#B6509E' : 'transparent',
+            color: activeTransaction.type === TransactionType.DEPOSIT ? '#ffffff' : '#B6509E',
             borderColor: '#B6509E',
             '&:hover': {
-              backgroundColor: direction === TransactionType.DEPOSIT ? '#A3458C' : 'rgba(182, 80, 158, 0.1)',
+              backgroundColor: activeTransaction.type === TransactionType.DEPOSIT ? '#A3458C' : 'rgba(182, 80, 158, 0.1)',
             },
             borderRadius: '8px',
             padding: '0.5rem 1.5rem',
@@ -68,14 +68,14 @@ export const BridgeDirection = ({
           Deposit
         </Button>
         <Button 
-          variant={direction === TransactionType.WITHDRAWAL ? 'contained' : 'outlined'}
-          onClick={() => setDirection(TransactionType.WITHDRAWAL)}
+          variant={activeTransaction.type === TransactionType.WITHDRAWAL ? 'contained' : 'outlined'}
+          onClick={() => onDirectionChange(TransactionType.WITHDRAWAL)}
           sx={{
-            backgroundColor: direction === TransactionType.WITHDRAWAL ? '#2EBAC6' : 'transparent',
-            color: direction === TransactionType.WITHDRAWAL ? '#ffffff' : '#2EBAC6',
+            backgroundColor: activeTransaction.type === TransactionType.WITHDRAWAL ? '#2EBAC6' : 'transparent',
+            color: activeTransaction.type === TransactionType.WITHDRAWAL ? '#ffffff' : '#2EBAC6',
             borderColor: '#2EBAC6',
             '&:hover': {
-              backgroundColor: direction === TransactionType.WITHDRAWAL ? '#259DAF' : 'rgba(46, 186, 198, 0.1)',
+              backgroundColor: activeTransaction.type === TransactionType.WITHDRAWAL ? '#259DAF' : 'rgba(46, 186, 198, 0.1)',
             },
             borderRadius: '8px',
             padding: '0.5rem 1.5rem',

@@ -20,7 +20,26 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
   const [needsApproval, setNeedsApproval] = useState(false);
   const { getAllowance, approveToken } = useWalletEVM(transaction?.tokenConfig);
   
-  const [depositAmount, setDepositAmount] = useState(1);
+  const [depositAmount, setDepositAmount] = useState<number>(transaction?.amount || 1);
+
+  // Reset state when transaction changes
+  useEffect(() => {
+    let step = 0;
+    if (transaction?.transactionHash) {
+      step = 3;
+      if (transaction.claimNFTIssuanceTransactionHash) {
+        step = 4;
+        if (transaction.claimNFTBurnTransactionHash) {
+          step = 5;
+        }
+      }
+    }
+    setActiveStep(step);
+    setBridgeStatus(TransactionStatus.PENDING);
+    setBridgedAmount(null);
+    setNeedsApproval(false);
+    setDepositAmount(1);
+  }, [transaction]);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
@@ -107,16 +126,14 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
     'Approve Token', 
     'Send Token to the bridge', 
     'Waiting for approval', 
-    'Switch to BCH', 
-    'Claim wrapped token'
+    'Claim token'
   ];
 
   const stepDescriptions = [
     'Specify the amount of Token you wish to bridge. Ensure the amount is between 1 and 10000. Additionally, provide your BCH address where the bridged tokens will be sent. It is better to connect to a BCH wallet as you will have to use the same addres to claim your tokens in the steps below. This address is crucial for the final step of claiming your tokens on the BCH network.',
     'Authorize the specified amount of Token to be spent by the bridge contract. This step is necessary to allow the contract to move your tokens. If you have already approved the required amount, this step will be skipped automatically.',
     'Initiate the bridging process by moving your Token to the bridge contract on the selected network. This step involves a blockchain transaction, so ensure you have enough ETH for gas fees.',
-    'Once the bridging transaction is confirmed, a claimNFT will be issued to your provided BCH address. This NFT represents your claim to the bridged tokens. You will need to wait for a specified period before you can claim the wUSDT on the BCH network.',
-    'Switch to the Bitcoin Cash network using your wallet. This step is necessary to interact with the BCH network and claim your tokens.',
+    'A ClaimNFT will be issued to your provided BCH address. This NFT represents your claim to the bridged tokens. You will need to wait for a specified period before you can claim the wUSDT on the BCH network. This process is a multi-sig process, 3 of 5 parties need to provide a signature and trigger a transaction to provide you a claim NFT.',
     'Claim your wrapped Token on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
   ];
 
@@ -171,7 +188,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                     color: '#2EBAC6', // Teal when active
                   },
                   '&.Mui-completed': {
-                    color: '#B6509E', // Pink when completed
+                    color: '#FFFFFF', // Pink when completed
                   }
                 },
                 '& .MuiStepIcon-root': {
@@ -180,7 +197,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                     color: '#2EBAC6', // Teal when active
                   },
                   '&.Mui-completed': {
-                    color: '#B6509E', // Pink when completed
+                    color: '#FFFFFF', // Pink when completed
                   }
                 }
               }}
@@ -188,16 +205,19 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
               {label}
             </StepLabel>
             <StepContent>
-              <Typography 
+              <Alert 
+                severity="info" 
                 sx={{ 
-                  mb: 5, 
-                  padding: '0.5rem',
-                  color: '#FFFFFF' // White text
+                  marginTop: '1rem',
+                  backgroundColor: 'rgba(46, 186, 198, 0.1)',
+                  color: '#FFFFFF',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(46, 186, 198, 0.2)',
+                  mb: 2
                 }}
               >
                 {stepDescriptions[index]}
-              </Typography>
-              
+              </Alert>
               {index === 0 && (
                 <>
                   <TextField
@@ -222,7 +242,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                       }
                     }}
                   />
-                  {connectedBchAddress ? (
+                  {transaction?.data ? (
                     <Typography
                       variant="body1"
                       sx={{
@@ -232,7 +252,21 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                         color: '#FFFFFF'
                       }}
                     >
-                      {connectedBchAddress}
+                      {transaction.data}
+                      {transaction.data !== connectedBchAddress && (
+                        <Alert
+                          severity="warning"
+                          sx={{
+                            mt: 1,
+                            backgroundColor: 'rgba(46, 186, 198, 0.1)',
+                            color: '#2EBAC6',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(46, 186, 198, 0.2)'
+                          }}
+                        >
+                          Connected BCH address differs from transaction address
+                        </Alert>
+                      )}
                     </Typography>
                   ) : (
                     <Typography
@@ -241,7 +275,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                         backgroundColor: '#37474F',
                         borderRadius: '4px',
                         padding: '1rem',
-                        color: '#FF6B6B' // Error red
+                        color: '#FF6B6B'
                       }}
                     >
                       Please connect your BCH wallet
@@ -308,6 +342,53 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                 </>
               )}
 
+              {index === 3 && (
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  gap: '1rem'
+                }}>
+                  <Box
+                    sx={{
+                      width: '24px',
+                      height: '24px',
+                      border: '3px solid #2EBAC6',
+                      borderTop: '3px solid transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' }
+                      }
+                    }}
+                  />
+                  <Typography sx={{ color: '#FFFFFF' }}>
+                    Waiting for approval...
+                  </Typography>
+                </Box>
+              )}
+
+              {index === 4 && (
+                <Typography>
+                  Switch to BCH
+                </Typography>
+              )}
+
+              {index === 5 && (
+                <Typography>
+                  Claim wrapped token
+                </Typography>
+              )}
+
+              {index === 6 && (
+                <Typography>
+                  Success!
+                </Typography>
+              )}
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <Button 
                   disabled={activeStep === 0} 
@@ -333,9 +414,12 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
                   variant="outlined"
                   onClick={handleNext}
                   disabled={
-                    (activeStep === 0 && (!depositAmount || !connectedBchAddress)) ||
+                    (activeStep === 0 && (!depositAmount || !transaction?.data)) ||
                     (activeStep === 1 && needsApproval) ||
-                    (activeStep === 2 && bridgeStatus !== 'completed')
+                    (activeStep === 2 && !transaction?.transactionHash) ||
+                    (activeStep === 3 && !transaction?.claimNFTIssuanceTransactionHash) ||
+                    (activeStep === 4 && !transaction?.claimNFTBurnTransactionHash) ||
+                    activeStep === 5
                   }
                   sx={{
                     borderColor: '#FFFFFF',
@@ -364,13 +448,13 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
       {needsApproval && transaction?.tokenConfig && (
         <Approval 
           tokenConfig={transaction.tokenConfig}
-          amount={depositAmount.toString()}
+          amount={transaction.amount.toString()}
           onApprovalComplete={() => setNeedsApproval(false)}
           address={connectedEvmAddress}
         />
       )}
 
-      {bridgedAmount && (
+      {transaction.claimNFTBurnTransactionHash && (
         <Alert 
           severity="success" 
           sx={{ 
@@ -380,9 +464,9 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress 
             borderRadius: '4px',
           }}
         >
-          Successfully bridged {bridgedAmount} USDT
+          Successfully bridged {transaction.amount} USDT
         </Alert>
       )}
     </Box>
   );
-}; 
+};

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle, Paper } from '@mui/material';
+import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
 import { Transaction, TransactionStatus, TransactionType } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
@@ -9,7 +9,6 @@ import { BridgeExplainer } from './components/bridge/BridgeExplainer';
 import { ContractExplainer } from './components/bridge/ContractExplainer';
 import { TopNavBar } from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
-import { TokenConfig } from './types/tokens';
 import Transactions from './components/bridge/transactions/Transactions';
 import { SUPPORTED_TOKENS } from './config/tokens';
 import { BridgeDirection } from './components/bridge/BridgeDirection';
@@ -19,7 +18,7 @@ const defaultTransaction: Transaction = {
   id: '',
   type: TransactionType.DEPOSIT,
   asset: '',
-  amount: '0',
+  amount: 1,
   createdAt: 0,
   status: TransactionStatus.PENDING,
   transactionHash: '',
@@ -42,7 +41,6 @@ export const App = () => {
   const [connectedEvmAddress, setConnectedEvmAddress] = useState<string | null>(null);
   const [openExplainer, setOpenExplainer] = useState(false);
   const [openContractExplainer, setOpenContractExplainer] = useState(false);
-  const [direction, setDirection] = useState<TransactionType>(TransactionType.DEPOSIT);
 
   const handleTransactionInspect = (transaction: Transaction) => {
     if(transaction.asset){
@@ -55,18 +53,6 @@ export const App = () => {
         setActiveTransaction(updatedTransaction);
       }
     }
-
-    if(transaction.type){
-      setDirection(transaction.type as TransactionType);
-    }
-  };
-
-  const handleTokenChange = (token: TokenConfig) => {
-    const updatedTransaction = {
-      ...activeTransaction,
-      tokenConfig: token
-    };
-    setActiveTransaction(updatedTransaction);
   };
 
   return (
@@ -122,7 +108,12 @@ export const App = () => {
             }}
           >
             <Box sx={{ flex: 1, mr: 2 }}>
-              <TokenSelector tokenConfig={activeTransaction.tokenConfig} onSelect={handleTokenChange} />
+              <TokenSelector tokenConfig={activeTransaction.tokenConfig} onSelect={(token) => {
+                  setActiveTransaction(prevTransaction => ({
+                    ...prevTransaction,
+                    tokenConfig: token
+                  }));
+                }} />
             </Box>
             <Box sx={{ flex: 1 }}>
               <TokenBalance tokenConfig={activeTransaction.tokenConfig} />
@@ -214,9 +205,17 @@ export const App = () => {
                 p: { xs: 2, md: 3 },
               }}
             >
-              <BridgeDirection activeTransaction={activeTransaction} onReset={() => setActiveTransaction(defaultTransaction)} />
+              <BridgeDirection 
+                activeTransaction={activeTransaction} 
+                onReset={() => setActiveTransaction({...defaultTransaction})} 
+                onDirectionChange={(direction) => {
+                  setActiveTransaction(prevTransaction => ({
+                    ...prevTransaction,
+                    type: direction
+                  }));
+                }}
+              />
               <BridgeInterface
-                direction={direction}
                 activeTransaction={activeTransaction}
                 connectedBchAddress={connectedBchAddress}
                 connectedEvmAddress={connectedEvmAddress}

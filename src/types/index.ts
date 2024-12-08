@@ -14,7 +14,7 @@ export enum TransactionStatus {
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: string;
+  amount: number;
   transactionHash?: string;
   chainId?: string;
   blockNumber?: string;
