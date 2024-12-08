@@ -2,8 +2,8 @@ import { Paper, Typography } from '@mui/material';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
 import { TokenConfig } from '../../types/tokens';
 
-export const TokenBalance = ({ selectedToken }: { selectedToken: TokenConfig }) => {
-  const tokenBalance = useTokenBalance(selectedToken);
+export const TokenBalance = ({ tokenConfig }: { tokenConfig: TokenConfig }) => {
+  const tokenBalance = useTokenBalance(tokenConfig);
   
   return (
     <Paper 

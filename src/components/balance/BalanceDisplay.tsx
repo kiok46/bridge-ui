@@ -4,14 +4,14 @@ import { TokenConfig } from '../../types/tokens';
 
 
 interface BalanceDisplayProps {
-  selectedToken: TokenConfig;
+  tokenConfig: TokenConfig;
 }
 
-export const BalanceDisplay = ({ selectedToken }: BalanceDisplayProps) => {
+export const BalanceDisplay = ({ tokenConfig }: BalanceDisplayProps) => {
   return (
     <Grid container spacing={3} mb={2}>
       <Grid item xs={12}>
-        <TokenBalance selectedToken={selectedToken} />
+        <TokenBalance tokenConfig={tokenConfig} />
       </Grid>
     </Grid>
   );

@@ -2,47 +2,45 @@ import { useState, useEffect } from 'react';
 import { Box, TextField, Button, Alert, Stepper, Step, StepLabel, StepContent, Typography } from '@mui/material';
 import { ethers } from 'ethers';
 import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
-import { Transaction } from '../../../types';
+import { Transaction, TransactionStatus } from '../../../types';
 import { Approval } from '../../balance/Approval';
 import { useWalletEVM } from '../../../hooks/useWalletEVM';
 import { SUPPORTED_CHAINS } from '../../../config/chains';
-import { TokenConfig } from '../../../types/tokens';
 
 interface DepositProps {
-  selectedToken?: TokenConfig;
   transaction?: Transaction;
-  bchAddress: string;
-  evmAddress: string;
+  connectedBchAddress: string;
+  connectedEvmAddress: string;
 }
 
-export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: DepositProps) => {
+export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress }: DepositProps) => {
   const [activeStep, setActiveStep] = useState(0);
-  const [bridgeStatus, setBridgeStatus] = useState('not-started');
+  const [bridgeStatus, setBridgeStatus] = useState<TransactionStatus>(TransactionStatus.PENDING);
   const [bridgedAmount, setBridgedAmount] = useState<string | null>(null);
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { getAllowance, approveToken } = useWalletEVM(selectedToken);
+  const { getAllowance, approveToken } = useWalletEVM(transaction?.tokenConfig);
   
   const [depositAmount, setDepositAmount] = useState(1);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
-      if (!selectedToken) return;
-      const chain = SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId);
+      if (!transaction?.tokenConfig) return;
+      const chain = SUPPORTED_CHAINS.find(chain => chain.id === transaction.tokenConfig.chainId);
       if (!chain) {
-        console.error('Chain not found for chainId:', selectedToken.chainId);
+        console.error('Chain not found for chainId:', transaction.tokenConfig.chainId);
         return;
       }
-      const allowance = await getAllowance(evmAddress, chain.bridgeAddress);
+      const allowance = await getAllowance(connectedEvmAddress, chain.bridgeAddress);
       setNeedsApproval(Number(depositAmount) > Number(allowance));
     };
 
-    if (depositAmount && selectedToken) {
+    if (depositAmount && transaction?.tokenConfig) {
       checkApprovalNeeded();
     }
-  }, [depositAmount, getAllowance, selectedToken]);
+  }, [depositAmount, getAllowance, transaction?.tokenConfig]);
 
   const handleApprove = async () => {
-    if (!selectedToken) {
+    if (!transaction?.tokenConfig) {
       alert('Please select a token first');
       return;
     }
@@ -58,29 +56,29 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
   };
 
   const bridge = async () => {
-    if (!selectedToken) {
+    if (!transaction?.tokenConfig) {
       return;
     }
 
     try {
-      setBridgeStatus('pending');
+      setBridgeStatus(TransactionStatus.PENDING);
       
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const bridgeAddress = SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.bridgeAddress;
+      const bridgeAddress = SUPPORTED_CHAINS.find(chain => chain.id === transaction.tokenConfig.chainId)?.bridgeAddress;
       const bridgeContract = new ethers.Contract(bridgeAddress, BRIDGE_ABI, signer);
       
-      const amountToBridge = ethers.parseUnits(depositAmount.toString(), selectedToken.decimals);
-      const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, bchAddress);
+      const amountToBridge = ethers.parseUnits(depositAmount.toString(), transaction.tokenConfig.decimals);
+      const bridgeTx = await bridgeContract.bridgeToBCH(amountToBridge, connectedBchAddress);
       
       await bridgeTx.wait();
-      setBridgeStatus('completed');
+      setBridgeStatus(TransactionStatus.COMPLETED);
       setBridgedAmount(depositAmount.toString());
       handleNext();
     } catch (error) {
       console.error('Bridge error:', error);
-      setBridgeStatus('not-started');
+      setBridgeStatus(TransactionStatus.FAILED);
       alert('Error during bridge: ' + (error as Error).message);
     }
   };
@@ -122,7 +120,7 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
     'Claim your wrapped Token on the Bitcoin Cash network. Use the claimNFT issued in the previous step to receive your tokens. Ensure your BCH wallet is connected and ready to receive the tokens.'
   ];
 
-  if (!selectedToken) {
+  if (!transaction?.tokenConfig) {
     return (
       <Box sx={{ 
         backgroundColor: '#2C2F36',
@@ -224,7 +222,7 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
                       }
                     }}
                   />
-                  {bchAddress ? (
+                  {connectedBchAddress ? (
                     <Typography
                       variant="body1"
                       sx={{
@@ -234,7 +232,7 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
                         color: '#FFFFFF'
                       }}
                     >
-                      {bchAddress}
+                      {connectedBchAddress}
                     </Typography>
                   ) : (
                     <Typography
@@ -335,7 +333,7 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
                   variant="outlined"
                   onClick={handleNext}
                   disabled={
-                    (activeStep === 0 && (!depositAmount || !bchAddress)) ||
+                    (activeStep === 0 && (!depositAmount || !connectedBchAddress)) ||
                     (activeStep === 1 && needsApproval) ||
                     (activeStep === 2 && bridgeStatus !== 'completed')
                   }
@@ -363,12 +361,12 @@ export const Deposit = ({ selectedToken, transaction, bchAddress, evmAddress }: 
         ))}
       </Stepper>
 
-      {needsApproval && selectedToken && (
+      {needsApproval && transaction?.tokenConfig && (
         <Approval 
-          selectedToken={selectedToken}
+          tokenConfig={transaction.tokenConfig}
           amount={depositAmount.toString()}
           onApprovalComplete={() => setNeedsApproval(false)}
-          address={evmAddress}
+          address={connectedEvmAddress}
         />
       )}
 

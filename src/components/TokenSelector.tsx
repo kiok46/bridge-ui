@@ -46,11 +46,11 @@ const SearchTextField = styled(TextField)(() => ({
 }));
 
 interface TokenSelectorProps {
-  selectedToken?: TokenConfig;
+  tokenConfig?: TokenConfig;
   onSelect: (token: TokenConfig) => void;
 }
 
-export const TokenSelector: React.FC<TokenSelectorProps> = ({ selectedToken, onSelect }) => {
+export const TokenSelector: React.FC<TokenSelectorProps> = ({ tokenConfig, onSelect }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -103,16 +103,16 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({ selectedToken, onS
           },
         }}
       >
-        {selectedToken ? (
+        {tokenConfig ? (
           <>
             <img
-              src={selectedToken.icon}
-              alt={selectedToken.symbol}
+              src={tokenConfig.icon}
+              alt={tokenConfig.symbol}
               style={{ width: 24, height: 24 }}
             />
             <Box>
               <Typography sx={{ color: themeConstants.colors.text.primary }}>
-                {selectedToken.symbol}
+                {tokenConfig.symbol}
               </Typography>
               <Typography 
                 variant="caption" 
@@ -122,7 +122,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({ selectedToken, onS
                   fontSize: '0.75rem'
                 }}
               >
-                on {SUPPORTED_CHAINS.find(chain => chain.id === selectedToken.chainId)?.name}
+                on {SUPPORTED_CHAINS.find(chain => chain.id === tokenConfig.chainId)?.name}
               </Typography>
             </Box>
           </>

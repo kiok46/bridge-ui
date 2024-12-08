@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle, Paper } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
-import { Transaction, TransactionType } from './types';
+import { Transaction, TransactionStatus, TransactionType } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
 import { BCHWallet } from './components/wallet/BCHWallet';
 import { TokenBalance } from './components/balance/TokenBalance';
@@ -14,21 +14,45 @@ import Transactions from './components/bridge/transactions/Transactions';
 import { SUPPORTED_TOKENS } from './config/tokens';
 import { BridgeDirection } from './components/bridge/BridgeDirection';
 
+
+const defaultTransaction: Transaction = {
+  id: '',
+  type: TransactionType.DEPOSIT,
+  asset: '',
+  amount: '0',
+  createdAt: 0,
+  status: TransactionStatus.PENDING,
+  transactionHash: '',
+  chainId: '',
+  blockNumber: '',
+  address: '',
+  data: '',
+  claimNFTIssuanceTransactionHash: '',
+  claimNFTBurnTransactionHash: '',
+  exitId: '',
+  exitIdTransactionHash: '',
+  processExitTransactionHash: '',
+  signature: '',
+  tokenConfig: null
+}
+
 export const App = () => {
-  const [activeTransaction, setActiveTransaction] = useState<Transaction | null>(null);
-  const [bchAddress, setBchAddress] = useState<string | null>(null);
-  const [evmAddress, setEvmAddress] = useState<string | null>(null);
+  const [activeTransaction, setActiveTransaction] = useState<Transaction>(defaultTransaction);
+  const [connectedBchAddress, setConnectedBchAddress] = useState<string | null>(null);
+  const [connectedEvmAddress, setConnectedEvmAddress] = useState<string | null>(null);
   const [openExplainer, setOpenExplainer] = useState(false);
   const [openContractExplainer, setOpenContractExplainer] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<TokenConfig | null>(null);
   const [direction, setDirection] = useState<TransactionType>(TransactionType.DEPOSIT);
 
   const handleTransactionInspect = (transaction: Transaction) => {
-    setActiveTransaction(transaction);
     if(transaction.asset){
       const token = SUPPORTED_TOKENS.find(token => token.symbol.toLowerCase() === transaction.asset.toLowerCase());
       if(token){
-        setSelectedToken(token);
+        const updatedTransaction = {
+          ...transaction,
+          tokenConfig: token
+        };
+        setActiveTransaction(updatedTransaction);
       }
     }
 
@@ -38,7 +62,11 @@ export const App = () => {
   };
 
   const handleTokenChange = (token: TokenConfig) => {
-    setSelectedToken(token);
+    const updatedTransaction = {
+      ...activeTransaction,
+      tokenConfig: token
+    };
+    setActiveTransaction(updatedTransaction);
   };
 
   return (
@@ -94,10 +122,10 @@ export const App = () => {
             }}
           >
             <Box sx={{ flex: 1, mr: 2 }}>
-              <TokenSelector selectedToken={selectedToken} onSelect={handleTokenChange} />
+              <TokenSelector tokenConfig={activeTransaction.tokenConfig} onSelect={handleTokenChange} />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <TokenBalance selectedToken={selectedToken} />
+              <TokenBalance tokenConfig={activeTransaction.tokenConfig} />
             </Box>  
           </Box>  
 
@@ -131,7 +159,7 @@ export const App = () => {
                   }
                 }}
               >
-                <EVMWallet selectedToken={selectedToken} onAddressUpdate={setEvmAddress} />
+                <EVMWallet tokenConfig={activeTransaction.tokenConfig} onAddressUpdate={setConnectedEvmAddress} />
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -149,15 +177,15 @@ export const App = () => {
                   }
                 }}
               >
-                <BCHWallet onAddressUpdate={setBchAddress} />
+                <BCHWallet onAddressUpdate={setConnectedBchAddress} />
               </Box>
             </Grid>
           </Grid>
 
           <Box sx={{ mb: 4 }}>
             <Transactions 
-              evmAddress={evmAddress}
-              bchAddress={bchAddress}
+              connectedEvmAddress={connectedEvmAddress}
+              connectedBchAddress={connectedBchAddress}
               onTransactionInspect={handleTransactionInspect}
             />
           </Box>
@@ -186,13 +214,12 @@ export const App = () => {
                 p: { xs: 2, md: 3 },
               }}
             >
-              <BridgeDirection activeTransaction={activeTransaction} onReset={() => setActiveTransaction(null)} />
+              <BridgeDirection activeTransaction={activeTransaction} onReset={() => setActiveTransaction(defaultTransaction)} />
               <BridgeInterface
                 direction={direction}
-                selectedToken={selectedToken}
                 activeTransaction={activeTransaction}
-                bchAddress={bchAddress}
-                evmAddress={evmAddress}
+                connectedBchAddress={connectedBchAddress}
+                connectedEvmAddress={connectedEvmAddress}
               />
             </Box>
           </Box>

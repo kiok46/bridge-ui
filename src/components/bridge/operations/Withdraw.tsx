@@ -13,12 +13,11 @@ import { ethers } from 'ethers';
 import { Transaction } from '../../../types';
 import { BRIDGE_ABI } from '../../../contracts/abis/Bridge';
 import { SUPPORTED_CHAINS } from '../../../config/chains';
-import { TokenConfig } from '../../../types/tokens';
+
 interface WithdrawProps {
-  selectedToken: TokenConfig;
   transaction: Transaction | null;
-  bchAddress: string;
-  evmAddress: string;
+  connectedBchAddress: string;
+  connectedEvmAddress: string;
 }
 
 const useStartExit = (selectedChain: string, amount: string, transactionHash: string) => {
@@ -49,7 +48,7 @@ const useStartExit = (selectedChain: string, amount: string, transactionHash: st
   return { startExitStatus, startedExitAmount, startExit };
 };
 
-export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }: WithdrawProps) => {
+export const Withdraw = ({ transaction, connectedBchAddress, connectedEvmAddress }: WithdrawProps) => {
   const [amount, setAmount] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
@@ -97,7 +96,7 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
   };
 
   const { startExitStatus, startedExitAmount, startExit: startExitClaim } = useStartExit(
-    selectedToken.chainId,
+    transaction?.tokenConfig.chainId || '',
     transaction?.amount || '',
     transaction?.transactionHash || ''
   );
@@ -106,7 +105,7 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[transaction?.tokenConfig.chainId || ''].bridgeAddress, BRIDGE_ABI, signer);
       const processExitTx = await bridgeContract.processExit(transaction!.exitId, transaction!.signature);
       await processExitTx.wait();
       console.log('Exit processed successfully');
@@ -120,7 +119,7 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[selectedToken.chainId].bridgeAddress, BRIDGE_ABI, signer);
+      const bridgeContract = new ethers.Contract(SUPPORTED_CHAINS[transaction?.tokenConfig.chainId || ''].bridgeAddress, BRIDGE_ABI, signer);
       
       // First start the exit
       const startExitTx = await bridgeContract.startExit(transaction!.amount, transaction!.transactionHash);
@@ -199,8 +198,8 @@ export const Withdraw = ({ selectedToken, transaction, bchAddress, evmAddress }:
               >
                 {stepDescriptions[index]}
               </Typography>
-              {bchAddress}
-              {evmAddress}
+              {connectedBchAddress}
+              {connectedEvmAddress}
 
                 {index === 0 && (
                   <TextField

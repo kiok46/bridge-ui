@@ -5,8 +5,8 @@ import { useWalletEVM } from '../../hooks/useWalletEVM';
 import { TokenConfig } from '../../types/tokens';
 import { useEffect } from 'react';
 
-export const EVMWallet = ({ selectedToken, onAddressUpdate }: { selectedToken: TokenConfig | null, onAddressUpdate: (address: string) => void }) => {
-  const { address, disconnect, network, connect, isInitializing } = useWalletEVM(selectedToken);
+export const EVMWallet = ({ tokenConfig, onAddressUpdate }: { tokenConfig: TokenConfig | null, onAddressUpdate: (address: string) => void }) => {
+  const { address, disconnect, network, connect, isInitializing } = useWalletEVM(tokenConfig);
 
 
   useEffect(() => {

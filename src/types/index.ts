@@ -1,6 +1,19 @@
+import { TokenConfig } from "./tokens";
+
+export enum TransactionType {
+  DEPOSIT = 'Deposit',
+  WITHDRAWAL = 'Withdrawal'
+}
+
+export enum TransactionStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed'
+}
+
 export interface Transaction {
   id: string;
-  type: 'Deposit' | 'Withdrawal';
+  type: TransactionType;
   amount: string;
   transactionHash?: string;
   chainId?: string;
@@ -14,13 +27,9 @@ export interface Transaction {
   processExitTransactionHash?: string;
   signature?: string;
   createdAt: number; // Unix timestamp in seconds
-  status: 'pending' | 'completed' | 'failed';
+  status: TransactionStatus;
   asset: string;
-}
-
-export enum TransactionType {
-  DEPOSIT = 'Deposit',
-  WITHDRAWAL = 'Withdrawal'
+  tokenConfig: TokenConfig;
 }
 
 export interface WalletState {

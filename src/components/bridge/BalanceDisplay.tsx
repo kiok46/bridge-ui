@@ -5,7 +5,7 @@ import { Approval } from '../balance/Approval';
 import { TokenConfig } from '../../types/tokens';
 
 interface BalanceDisplayProps {
-  selectedToken: TokenConfig;
+  tokenConfig: TokenConfig;
   amount: string;
   onApprovalComplete: () => void;
   needsApproval: boolean;
@@ -13,7 +13,7 @@ interface BalanceDisplayProps {
 }
 
 export const BalanceDisplay = ({ 
-  selectedToken,
+  tokenConfig,
   amount,
   onApprovalComplete,
   needsApproval,
@@ -22,12 +22,12 @@ export const BalanceDisplay = ({
   return (
     <Grid container spacing={3} mb={2}>
       <Grid item xs={12}>
-        <TokenBalance selectedToken={selectedToken} />
+        <TokenBalance tokenConfig={tokenConfig} />
       </Grid>
       {needsApproval && (
         <Grid item xs={12}>
           <Approval 
-            selectedToken={selectedToken}
+            tokenConfig={tokenConfig}
             amount={amount}
             onApprovalComplete={onApprovalComplete}
             address={address}

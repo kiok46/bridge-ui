@@ -5,30 +5,30 @@ import { formatAmount } from '../../utils/helpers';
 import { TokenConfig } from '../../types/tokens';
 
 interface ApprovalProps {
-  selectedToken?: TokenConfig;
+  tokenConfig?: TokenConfig;
   amount: string;
   onApprovalComplete: () => void;
   address: string;
 }
 
-export const Approval = ({ selectedToken, amount, onApprovalComplete, address }: ApprovalProps) => {
+export const Approval = ({ tokenConfig, amount, onApprovalComplete, address }: ApprovalProps) => {
   const [needsApproval, setNeedsApproval] = useState(false);
-  const { checkAllowance, approve } = useApproval(selectedToken, address);
+  const { checkAllowance, approve } = useApproval(tokenConfig, address);
 
   useEffect(() => {
     const checkApprovalNeeded = async () => {
-      if (!selectedToken) return;
+      if (!tokenConfig) return;
       const allowance = await checkAllowance();
       setNeedsApproval(Number(amount) > Number(allowance));
     };
 
-    if (amount && selectedToken) {
+    if (amount && tokenConfig) {
       checkApprovalNeeded();
     }
-  }, [amount, checkAllowance, selectedToken]);
+  }, [amount, checkAllowance, tokenConfig]);
 
   const handleApprove = async () => {
-    if (!selectedToken) return;
+    if (!tokenConfig) return;
     try {
       await approve(amount);
       setNeedsApproval(false);
@@ -45,7 +45,7 @@ export const Approval = ({ selectedToken, amount, onApprovalComplete, address }:
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="body2" color="text.secondary" gutterBottom>
-        Approval needed for {formatAmount(amount, selectedToken.decimals)} {selectedToken.symbol}
+        Approval needed for {formatAmount(amount, tokenConfig.decimals)} {tokenConfig.symbol}
       </Typography>
       <Button
         variant="contained"

@@ -1,24 +1,20 @@
-import { Box, Button, Paper, Alert, Grid } from '@mui/material';
+import { Paper, Alert, Grid } from '@mui/material';
 import { Deposit } from './operations/Deposit';
 import { Withdraw } from './operations/Withdraw';
 import { Transaction, TransactionType } from '../../types';
-import { TokenConfig } from '../../types/tokens';
-import { useState } from 'react';
 
 interface BridgeInterfaceProps {
   direction: TransactionType;
-  selectedToken: TokenConfig | null;
   activeTransaction: Transaction | null;
-  bchAddress: string;
-  evmAddress: string;
+  connectedBchAddress: string;
+  connectedEvmAddress: string;
 }
 
 export const BridgeInterface = ({
   direction,
-  selectedToken,
   activeTransaction,
-  bchAddress,
-  evmAddress
+  connectedBchAddress,
+  connectedEvmAddress
 }: BridgeInterfaceProps) => {
 
   return (
@@ -50,17 +46,15 @@ export const BridgeInterface = ({
         >
           {direction === TransactionType.DEPOSIT ? (
             <Deposit 
-              selectedToken={selectedToken}
               transaction={activeTransaction}
-              bchAddress={bchAddress}
-              evmAddress={evmAddress}
+              connectedBchAddress={connectedBchAddress}
+              connectedEvmAddress={connectedEvmAddress}
             />
           ) : (
             <Withdraw 
-              selectedToken={selectedToken}
               transaction={activeTransaction}
-              bchAddress={bchAddress}
-              evmAddress={evmAddress}
+              connectedBchAddress={connectedBchAddress}
+              connectedEvmAddress={connectedEvmAddress}
             />
           )}
 

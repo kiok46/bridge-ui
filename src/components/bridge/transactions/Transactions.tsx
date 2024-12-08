@@ -6,8 +6,8 @@ import { useState } from 'react';
 import { TransactionDetails, TransactionDetailsDialog } from './TransactionDetails';
 
 interface TransactionsProps {
-  evmAddress: string;
-  bchAddress: string;
+  connectedEvmAddress: string;
+  connectedBchAddress: string;
   onTransactionInspect: (transaction: Transaction) => void;
 }
 
@@ -125,11 +125,11 @@ const TransactionCard = ({
 };
 
 const Transactions = ({ 
-  evmAddress, 
-  bchAddress, 
+  connectedEvmAddress, 
+  connectedBchAddress, 
   onTransactionInspect
 }: TransactionsProps) => {
-  const { loading, deposits, withdrawals } = useTransactions(evmAddress, bchAddress);
+  const { loading, deposits, withdrawals } = useTransactions(connectedEvmAddress, connectedBchAddress);
   const transactions: Transaction[] = [
     ...deposits.map(tx => ({...tx, type: 'Deposit' as TransactionType})),
     ...withdrawals.map(tx => ({...tx, type: 'Withdrawal' as TransactionType}))
