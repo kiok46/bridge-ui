@@ -5,11 +5,10 @@ import { shortenAddress, getFormattedAmount } from '../../../utils/helpers';
 interface TransactionDetailsProps {
   transaction: Transaction;
   explorerUrl: string;
+  onInspect: () => void;
 }
 
-export const TransactionDetails = ({ transaction, explorerUrl, onInspect }: TransactionDetailsProps & {
-  onInspect?: () => void
-}) => {
+export const TransactionDetails = ({ transaction, explorerUrl, onInspect }: TransactionDetailsProps) => {
   const getStatusChip = () => {
     if (transaction.type === 'Deposit') {
       if (transaction.claimNFTBurnTransactionHash) {
@@ -77,11 +76,9 @@ export const TransactionDetails = ({ transaction, explorerUrl, onInspect }: Tran
 export const TransactionDetailsDialog = ({ 
   transaction, 
   explorerUrl,
-  onSelect,
   onInspect
 }: TransactionDetailsProps & { 
-  onSelect?: () => void;
-  onInspect?: () => void;
+  onInspect: () => void;
 }) => {
 
   return (
@@ -328,32 +325,6 @@ export const TransactionDetailsDialog = ({
               } 
             />
           </Box>
-        </Box>
-      )}
-
-      {onSelect && (
-        <Box sx={{ 
-          mt: 4, 
-          pt: 4, 
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          display: 'flex',
-          justifyContent: 'flex-end'
-        }}>
-          <Button
-            variant="contained"
-            onClick={onSelect}
-            sx={{
-              backgroundColor: '#B6509E',
-              '&:hover': {
-                backgroundColor: '#8F3F7B'
-              },
-              textTransform: 'none',
-              fontWeight: 500,
-              px: 4
-            }}
-          >
-            Select Transaction
-          </Button>
         </Box>
       )}
     </Box>

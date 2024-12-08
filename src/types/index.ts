@@ -18,7 +18,10 @@ export interface Transaction {
   asset: string;
 }
 
-export type TransactionType = 'Deposit' | 'Withdrawal';
+export enum TransactionType {
+  DEPOSIT = 'Deposit',
+  WITHDRAWAL = 'Withdrawal'
+}
 
 export interface WalletState {
   userEVMAddress: string;

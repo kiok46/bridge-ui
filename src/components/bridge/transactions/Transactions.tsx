@@ -8,18 +8,15 @@ import { TransactionDetails, TransactionDetailsDialog } from './TransactionDetai
 interface TransactionsProps {
   evmAddress: string;
   bchAddress: string;
-  onTransactionButtonClick: (transaction: Transaction) => void;
-  onTransactionSelect?: (transaction: Transaction) => void;
+  onTransactionInspect: (transaction: Transaction) => void;
 }
 
 const TransactionCard = ({ 
   transaction, 
-  onTransactionButtonClick,
-  onTransactionSelect 
+  onTransactionInspect
 }: { 
   transaction: Transaction;
-  onTransactionButtonClick: (transaction: Transaction) => void;
-  onTransactionSelect?: (transaction: Transaction) => void;
+  onTransactionInspect: (transaction: Transaction) => void;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -31,15 +28,8 @@ const TransactionCard = ({
     setOpen(false);
   };
 
-  const handleSelect = () => {
-    if (onTransactionSelect) {
-      onTransactionSelect(transaction);
-      handleClose();
-    }
-  };
-
   const handleInspect = () => {
-    onTransactionButtonClick(transaction);
+    onTransactionInspect(transaction);
     handleClose();
   };
 
@@ -71,6 +61,7 @@ const TransactionCard = ({
           <TransactionDetails 
             transaction={transaction} 
             explorerUrl={'https://bch.loping.net/tx/'}
+            onInspect={handleInspect}
           /> 
         </Box>
       </Paper>
@@ -125,7 +116,6 @@ const TransactionCard = ({
           <TransactionDetailsDialog 
             transaction={transaction} 
             explorerUrl={'https://bch.loping.net/tx/'}
-            onSelect={onTransactionSelect ? handleSelect : undefined}
             onInspect={handleInspect}
           />
         </DialogContent>
@@ -137,8 +127,7 @@ const TransactionCard = ({
 const Transactions = ({ 
   evmAddress, 
   bchAddress, 
-  onTransactionButtonClick,
-  onTransactionSelect
+  onTransactionInspect
 }: TransactionsProps) => {
   const { loading, deposits, withdrawals } = useTransactions(evmAddress, bchAddress);
   const transactions: Transaction[] = [
@@ -209,8 +198,7 @@ const Transactions = ({
           <TransactionCard
             key={transaction.id}
             transaction={transaction}
-            onTransactionButtonClick={onTransactionButtonClick}
-            onTransactionSelect={onTransactionSelect}
+            onTransactionInspect={onTransactionInspect}
           />
         ))}
       </Box>

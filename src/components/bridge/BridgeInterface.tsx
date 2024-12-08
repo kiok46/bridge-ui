@@ -1,30 +1,26 @@
 import { Box, Button, Paper, Alert, Grid } from '@mui/material';
 import { Deposit } from './operations/Deposit';
 import { Withdraw } from './operations/Withdraw';
-import { Transaction } from '../../types';
+import { Transaction, TransactionType } from '../../types';
 import { TokenConfig } from '../../types/tokens';
+import { useState } from 'react';
 
 interface BridgeInterfaceProps {
-  direction: 'toBCH' | 'toEVM';
-  setDirection: (direction: 'toBCH' | 'toEVM') => void;
+  direction: TransactionType;
   selectedToken: TokenConfig | null;
-  activeDepositTransaction: Transaction | null;
-  activeWithdrawTransaction: Transaction | null;
-  depositTransactions: Transaction[];
-  withdrawalTransactions: Transaction[];
+  activeTransaction: Transaction | null;
   bchAddress: string;
   evmAddress: string;
 }
 
 export const BridgeInterface = ({
   direction,
-  setDirection,
   selectedToken,
-  activeDepositTransaction,
-  activeWithdrawTransaction,
+  activeTransaction,
   bchAddress,
   evmAddress
 }: BridgeInterfaceProps) => {
+
   return (
     <Grid 
       container 
@@ -52,53 +48,17 @@ export const BridgeInterface = ({
             gap: 2
           }}
         >
-          <Box display="flex" justifyContent="center" mb={2}>
-            <Button 
-              variant={direction === 'toBCH' ? 'contained' : 'outlined'}
-              onClick={() => setDirection('toBCH')}
-              sx={{ 
-                marginRight: '1rem',
-                backgroundColor: direction === 'toBCH' ? '#B6509E' : 'transparent',
-                color: direction === 'toBCH' ? '#ffffff' : '#B6509E',
-                borderColor: '#B6509E',
-                '&:hover': {
-                  backgroundColor: direction === 'toBCH' ? '#A3458C' : 'rgba(182, 80, 158, 0.1)',
-                },
-                borderRadius: '8px',
-                padding: '0.5rem 1.5rem',
-              }}
-            >
-              Deposit
-            </Button>
-            <Button 
-              variant={direction === 'toEVM' ? 'contained' : 'outlined'}
-              onClick={() => setDirection('toEVM')}
-              sx={{
-                backgroundColor: direction === 'toEVM' ? '#2EBAC6' : 'transparent',
-                color: direction === 'toEVM' ? '#ffffff' : '#2EBAC6',
-                borderColor: '#2EBAC6',
-                '&:hover': {
-                  backgroundColor: direction === 'toEVM' ? '#259DAF' : 'rgba(46, 186, 198, 0.1)',
-                },
-                borderRadius: '8px',
-                padding: '0.5rem 1.5rem',
-              }}
-            >
-              Withdraw
-            </Button>
-          </Box>
-
-          {direction === 'toBCH' ? (
+          {direction === TransactionType.DEPOSIT ? (
             <Deposit 
               selectedToken={selectedToken}
-              transaction={activeDepositTransaction}
+              transaction={activeTransaction}
               bchAddress={bchAddress}
               evmAddress={evmAddress}
             />
           ) : (
             <Withdraw 
               selectedToken={selectedToken}
-              transaction={activeWithdrawTransaction}
+              transaction={activeTransaction}
               bchAddress={bchAddress}
               evmAddress={evmAddress}
             />

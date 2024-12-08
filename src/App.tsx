@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Grid, Box, Typography, Dialog, DialogContent, DialogTitle, Paper } from '@mui/material';
 import { BridgeInterface } from './components/bridge/BridgeInterface';
-import { Transaction } from './types';
+import { Transaction, TransactionType } from './types';
 import { EVMWallet } from './components/wallet/EVMWallet';
 import { BCHWallet } from './components/wallet/BCHWallet';
 import { TokenBalance } from './components/balance/TokenBalance';
@@ -11,33 +11,30 @@ import { TopNavBar } from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
 import { TokenConfig } from './types/tokens';
 import Transactions from './components/bridge/transactions/Transactions';
+import { SUPPORTED_TOKENS } from './config/tokens';
+import { BridgeDirection } from './components/bridge/BridgeDirection';
 
 export const App = () => {
-  const [direction, setDirection] = useState<'toBCH' | 'toEVM'>('toBCH');
-  const [amount, setAmount] = useState('0');
-  const [needsApproval, setNeedsApproval] = useState(false);
-  const [activeDepositTransaction, setActiveDepositTransaction] = useState<Transaction | null>(null);
-  const [activeWithdrawTransaction, setActiveWithdrawTransaction] = useState<Transaction | null>(null);
-  const [depositTransactions, setDepositTransactions] = useState<Transaction[]>([]);
-  const [withdrawalTransactions, setWithdrawalTransactions] = useState<Transaction[]>([]);
+  const [activeTransaction, setActiveTransaction] = useState<Transaction | null>(null);
   const [bchAddress, setBchAddress] = useState<string | null>(null);
   const [evmAddress, setEvmAddress] = useState<string | null>(null);
   const [openExplainer, setOpenExplainer] = useState(false);
   const [openContractExplainer, setOpenContractExplainer] = useState(false);
   const [selectedToken, setSelectedToken] = useState<TokenConfig | null>(null);
+  const [direction, setDirection] = useState<TransactionType>(TransactionType.DEPOSIT);
 
-  const handleTransactionButtonClick = (transaction: Transaction) => {
-    if (transaction.type === 'Deposit') {
-      setActiveDepositTransaction(transaction);
-    } else {
-      setActiveWithdrawTransaction(transaction);
+  const handleTransactionInspect = (transaction: Transaction) => {
+    setActiveTransaction(transaction);
+    if(transaction.asset){
+      const token = SUPPORTED_TOKENS.find(token => token.symbol.toLowerCase() === transaction.asset.toLowerCase());
+      if(token){
+        setSelectedToken(token);
+      }
     }
-  };
 
-  const handleReset = () => {
-    setActiveDepositTransaction(null);
-    setActiveWithdrawTransaction(null);
-    setAmount('0');
+    if(transaction.type){
+      setDirection(transaction.type as TransactionType);
+    }
   };
 
   const handleTokenChange = (token: TokenConfig) => {
@@ -158,27 +155,11 @@ export const App = () => {
           </Grid>
 
           <Box sx={{ mb: 4 }}>
-            {/* <Paper
-              elevation={3}
-              sx={{
-                padding: '1.25rem',
-                height: '400px',
-                backgroundColor: '#1B2030',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                color: '#FFFFFF',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            > */}
-              <Transactions 
-                evmAddress={evmAddress}
-                bchAddress={bchAddress}
-                onTransactionButtonClick={handleTransactionButtonClick}
-              />
-            {/* </Paper> */}
+            <Transactions 
+              evmAddress={evmAddress}
+              bchAddress={bchAddress}
+              onTransactionInspect={handleTransactionInspect}
+            />
           </Box>
 
           <Box
@@ -205,14 +186,11 @@ export const App = () => {
                 p: { xs: 2, md: 3 },
               }}
             >
+              <BridgeDirection activeTransaction={activeTransaction} onReset={() => setActiveTransaction(null)} />
               <BridgeInterface
-                selectedToken={selectedToken}
                 direction={direction}
-                setDirection={setDirection}
-                activeDepositTransaction={activeDepositTransaction}
-                activeWithdrawTransaction={activeWithdrawTransaction}
-                depositTransactions={depositTransactions}
-                withdrawalTransactions={withdrawalTransactions}
+                selectedToken={selectedToken}
+                activeTransaction={activeTransaction}
                 bchAddress={bchAddress}
                 evmAddress={evmAddress}
               />
