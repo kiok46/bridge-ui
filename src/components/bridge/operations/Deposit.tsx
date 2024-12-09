@@ -7,6 +7,7 @@ import { Approval } from '../../balance/Approval';
 import { useWalletEVM } from '../../../hooks/useWalletEVM';
 import { SUPPORTED_CHAINS } from '../../../config/chains';
 import { useElectrum } from '../../../hooks/useElectrum';
+import { getFormattedAmount } from '../../../utils/helpers';
 
 interface DepositProps {
   transaction?: Transaction;
@@ -478,7 +479,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
             borderRadius: '4px',
           }}
         >
-          Successfully bridged {transaction.amount} USDT
+          Successfully bridged {getFormattedAmount(transaction)} {transaction.asset}
         </Alert>
       )}
     </Box>
