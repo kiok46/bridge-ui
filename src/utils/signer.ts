@@ -186,12 +186,20 @@ export const claimTokenTransaction = async (contract, userAddress, bridgeReserve
     ...decodedTransaction.inputs[1],
     // @ts-ignore
     lockingBytecode: (cashAddressToLockingBytecode(userAddress)).bytecode,
-    valueSatoshis: BigInt(userClaimNFTUTXO.value),
+    valueSatoshis: BigInt(claimNFTUTXO.satoshis),
+    token: claimNFTUTXO.token && {
+      ...claimNFTUTXO.token,
+      category: hexToBin(claimNFTUTXO.token.category),
+      nft: claimNFTUTXO.token.nft && {
+        ...claimNFTUTXO.token.nft,
+        commitment: hexToBin(claimNFTUTXO.token.nft.commitment),
+      },
+    },
   }, {
     ...decodedTransaction.inputs[2],
     // @ts-ignore
     lockingBytecode: (cashAddressToLockingBytecode(userAddress)).bytecode,
-    valueSatoshis: BigInt(fundTransactionUTXO.value),
+    valueSatoshis: BigInt(fundUTXO.satoshis),
   }];
 
   const wcTransactionObj = {

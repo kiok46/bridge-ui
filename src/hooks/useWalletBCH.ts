@@ -171,6 +171,7 @@ export const useWalletBCH = () => {
   const signTransaction = async (options) => {
     try {
       console.log('signing transaction', options);
+      console.log('lastSession', lastSession);
       const result = await signClient.request({
         chainId: connectedChain,
         topic: lastSession.topic,

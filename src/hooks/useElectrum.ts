@@ -18,17 +18,17 @@ export const useElectrum = () => {
   const { signTransaction } = useWalletBCH();
 
   const getClient = async () => {
-    // return new ElectrumClient(
-    //   'Token Bridge',
-    //   '1.5.3',
-    //   'fulcrum.greyh.at'
-    // );
-
     return new ElectrumClient(
       'Token Bridge',
       '1.5.3',
-      'electrum.imaginary.cash'
+      'fulcrum.greyh.at'
     );
+
+    // return new ElectrumClient(
+    //   'Token Bridge',
+    //   '1.5.3',
+    //   'electrum.imaginary.cash'
+    // );
 
     // return await initializeElectrumClient('Electrum Protocol Test', 'fulcrum.greyh.at');
   }
