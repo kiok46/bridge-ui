@@ -196,7 +196,7 @@ const Transactions = ({
       }}>
         {transactions.map((transaction) => (
           <TransactionCard
-            key={transaction.id}
+            key={transaction._id}
             transaction={transaction}
             onTransactionInspect={onTransactionInspect}
           />

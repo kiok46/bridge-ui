@@ -13,9 +13,11 @@ export const BridgeDirection = ({
   onDirectionChange
 }: BridgeDirectionProps) => {
 
+  console.log('activeTransaction', activeTransaction);
+
   return (
   <>
-    {activeTransaction?.id && (
+    {activeTransaction?._id && (
       <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2, flexDirection: { xs: 'column', sm: 'row' }, width: '100%' }}>
         <Alert 
           severity="info"
@@ -48,7 +50,7 @@ export const BridgeDirection = ({
       </Box>
     )}
 
-    {!activeTransaction.id && (
+    {!activeTransaction?._id && (
       <Box display="flex" justifyContent="center" mb={2} sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
         <Button 
           variant={activeTransaction.type === TransactionType.DEPOSIT ? 'contained' : 'outlined'}

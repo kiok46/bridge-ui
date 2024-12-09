@@ -15,7 +15,7 @@ import { BridgeDirection } from './components/bridge/BridgeDirection';
 
 
 const defaultTransaction: Transaction = {
-  id: '',
+  _id: '',
   type: TransactionType.DEPOSIT,
   asset: '',
   amount: 1,

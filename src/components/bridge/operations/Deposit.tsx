@@ -232,7 +232,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
                     label="Enter amount (1-10000)"
                     value={transaction?.amount}
                     onChange={handleAmountChange}
-                    disabled={!!transaction?.id}
+                    disabled={!!transaction?._id}
                     inputProps={{ 
                       pattern: "\\d*",
                       inputMode: "numeric"

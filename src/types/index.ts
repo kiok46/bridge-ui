@@ -12,7 +12,7 @@ export enum TransactionStatus {
 }
 
 export interface Transaction {
-  id: string;
+  _id: string;
   type: TransactionType;
   amount: number;
   transactionHash?: string;
