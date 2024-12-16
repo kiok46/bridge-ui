@@ -7,7 +7,6 @@ import { BCHWallet } from './components/wallet/BCHWallet';
 import { TokenBalance } from './components/balance/TokenBalance';
 import { BridgeExplainer } from './components/bridge/BridgeExplainer';
 import { ContractExplainer } from './components/bridge/ContractExplainer';
-import TopNavBar from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
 import Transactions from './components/bridge/transactions/Transactions';
 import { SUPPORTED_TOKENS } from './config/tokens';
@@ -98,17 +97,6 @@ export const App = () => {
   };
 
   return (
-    <Box
-      sx={{
-        background: '#1B2030',
-        minHeight: '100vh',
-        backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(130, 71, 229, 0.02) 0%, rgba(130, 71, 229, 0.01) 100%)',
-        color: '#FFFFFF',
-        fontFamily: 'Inter, sans-serif',
-      }}
-    >
-      <TopNavBar />
-
       <Container maxWidth="lg" sx={{ pt: 6 }}>
         <Box
           sx={{
@@ -265,7 +253,6 @@ export const App = () => {
         </Box>
         
       </Container>
-    </Box>
   );
 };
 

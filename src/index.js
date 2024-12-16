@@ -1,13 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { withProviders } from './hoc/withProviders';
 import App from './App';
+import HowItWorks from './components/HowItWorks';
+import './index.css';
+import { Box } from '@mui/material';
+import TopNavBar from './components/TopNavBar';
 import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const WrappedApp = withProviders(App);
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
 root.render(
   <React.StrictMode>
-    <App />
+    <Box
+      sx={{
+        background: '#1B2030',
+        minHeight: '100vh',
+        backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(130, 71, 229, 0.02) 0%, rgba(130, 71, 229, 0.01) 100%)',
+        color: '#FFFFFF',
+        fontFamily: 'Inter, sans-serif',
+      }}
+    >
+      <TopNavBar />
+      <Router>
+        <Routes>
+          <Route path="/" element={<WrappedApp />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+        </Routes>
+      </Router>
+    </Box>
   </React.StrictMode>
 );
 
