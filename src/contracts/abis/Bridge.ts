@@ -1,16 +1,4 @@
-export const BRIDGE_CONTRACT_ADDRESS = "0x69fB183C10C546B734aFceC4ca6A5a8c5711b1f9"; // Bridge contract address
-
-export const supportedNetworks = [
-  {
-    network: 'sepolia',
-    name: 'Sepolia Testnet',
-    symbol: 'ETH',
-    icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-    usdtAddress: '0x0ea37B93D683FcD2BC50c0B365D4619f8bA10108'
-  }
-];
-
-export const bridgeAbi = [
+export const BRIDGE_ABI = [
   {
     "inputs": [],
     "name": "CannotBeAContract",
@@ -18,7 +6,7 @@ export const bridgeAbi = [
   },
   {
     "inputs": [],
-    "name": "ExitAlreadyProcessed",
+    "name": "ExitAlreadyProcessed", 
     "type": "error"
   },
   {
