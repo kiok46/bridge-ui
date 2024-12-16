@@ -6,6 +6,7 @@ export enum TransactionType {
 }
 
 export enum TransactionStatus {
+  INCOMPLETE = 'incomplete',
   PENDING = 'pending',
   COMPLETED = 'completed',
   FAILED = 'failed'

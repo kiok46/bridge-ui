@@ -18,7 +18,7 @@ interface DepositProps {
 
 export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress, onTransactionUpdate }: DepositProps) => {
   const [activeStep, setActiveStep] = useState(0);
-  const [bridgeStatus, setBridgeStatus] = useState<TransactionStatus>(TransactionStatus.PENDING);
+  const [bridgeStatus, setBridgeStatus] = useState<TransactionStatus>(TransactionStatus.INCOMPLETE);
   const [needsApproval, setNeedsApproval] = useState(false);
   const { getAllowance, approveToken } = useWalletEVM(transaction?.tokenConfig);
   const { claimToken } = useElectrum();
@@ -37,7 +37,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
       }
     }
     setActiveStep(step);
-    setBridgeStatus(TransactionStatus.PENDING);
+    // setBridgeStatus(TransactionStatus.PENDING);
     setNeedsApproval(false);
   }, [transaction]);
 
@@ -158,7 +158,6 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
       </Box>
     );
   }
-
   return (
     <Box 
       className="bridge-form" 
@@ -250,7 +249,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
                       }
                     }}
                   />
-                  {transaction?.data ? (
+                  {!!transaction?.data ? (
                     <Typography
                       variant="body1"
                       sx={{
@@ -345,7 +344,7 @@ export const Deposit = ({ transaction, connectedBchAddress, connectedEvmAddress,
                       }
                     }}
                   >
-                    {bridgeStatus === 'pending' ? 'Bridging...' : 'Bridge Token'}
+                    {bridgeStatus === TransactionStatus.PENDING ? 'Bridging...' : bridgeStatus === TransactionStatus.INCOMPLETE ? 'Bridge Token' : 'Bridge Token'}
                   </Button>
                 </>
               )}

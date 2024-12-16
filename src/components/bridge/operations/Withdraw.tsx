@@ -198,9 +198,6 @@ export const Withdraw = ({ transaction, connectedBchAddress, connectedEvmAddress
               >
                 {stepDescriptions[index]}
               </Typography>
-              {connectedBchAddress}
-              {connectedEvmAddress}
-
                 {index === 0 && (
                   <TextField
                     type="text"
