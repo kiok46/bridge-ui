@@ -3,10 +3,11 @@ export const themeConstants = {
     primary: {
       gradient: 'linear-gradient(90deg, #B6509E 2%, #2EBAC6 100%)',
       gradientHover: 'linear-gradient(90deg, #B6509E 10%, #2EBAC6 100%)',
+      main: '#2EBAC6',
     },
     text: {
-      primary: '#F1F1F3',
-      secondary: '#8E92A3',
+      primary: '#FFFFFF',
+      secondary: '#999999',
     },
     background: {
       dark: '#1B2030',
@@ -14,8 +15,8 @@ export const themeConstants = {
       button: 'rgba(255, 255, 255, 0.05)',
     },
     error: {
-      main: '#FF4343',
-      light: 'rgba(255, 67, 67, 0.2)',
+      main: '#FF0000',
+      light: '#FFCCCC',
     }
   },
   borderRadius: {

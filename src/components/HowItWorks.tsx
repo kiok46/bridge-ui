@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import { BridgeExplainer } from './bridge/BridgeExplainer';
 
 const HowItWorks: React.FC = () => {
@@ -13,20 +13,7 @@ const HowItWorks: React.FC = () => {
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <Container maxWidth="lg" sx={{ pt: 6 }}>
-        <Box
-          sx={{
-            borderRadius: '24px',
-            background: 'rgba(31, 34, 44, 0.5)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            p: { xs: 2, md: 4 },
-            mb: 4,
-          }}
-        >
-          <BridgeExplainer />
-        </Box>
-      </Container>
+      <BridgeExplainer />
     </Box>
   );
 };

@@ -1,10 +1,13 @@
-import { Box, Typography, Container, Paper, useTheme } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Container, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import WarningIcon from '@mui/icons-material/Warning';
-import { alpha } from '@mui/material/styles';
 import { themeConstants } from '../../theme/constants';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { contractFiles } from '../../contracts/files';
 
 const DocSection = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -89,9 +92,15 @@ const StepContent = ({ step, index }: { step: Step; index: number }) => {
       <StepTitle variant="h3">
         {step.title}
       </StepTitle>
-      <StepDescription variant="body1">
-        {step.description}
-      </StepDescription>
+      {step.hasCode ? (
+        <SyntaxHighlighter language="solidity" style={solarizedlight}>
+          {step.description}
+        </SyntaxHighlighter>
+      ) : (
+        <StepDescription variant="body1">
+          {step.description}
+        </StepDescription>
+      )}
       
       {step.warning && (
         <WarningBox>
@@ -152,10 +161,61 @@ interface Step {
   description: string;
   info?: string;
   warning?: string;
+  hasCode?: boolean;
 }
 
 export const BridgeExplainer = () => {
-  const theme = useTheme();
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('section > div');
+      let currentSection: string | null = null;
+
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 100 && rect.bottom >= 100) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const aboutTheBridgeInfoSteps: Step[] = [
+    {
+      title: "What is the bridge?",
+      hasCode: false,
+      description: "The bridge is a non custodian bridge that allows you to bridge your tokens between the Ethereum and Bitcoin Cash networks. It is a multi-sig bridge with a set of co-signers to ensure security. The only power the co-signers have is approve the entry or exit of the bridge. The exact scheme is not finalised it but it's will be a multi-sig format. for example: 4 of 7. This means that atleast 4 of the 7 co-signers need to approve the entry or exit of the bridge. On both sides of the bridge, the co-signers can be different to increase security.",
+    },
+    {
+      title: "Multi-sig Bridge",
+      hasCode: false,
+      description: "4 of 7",
+    },
+    {
+      title: "BCH Issuer Contract",
+      hasCode: true,
+      description: contractFiles.bchIssuerContract.trim(),
+    },
+    {
+      title: "BCH Bridge Contract",
+      hasCode: true,
+      description: contractFiles.bchBridgeContract.trim(),
+    },
+    {
+      title: "EVM Bridge Contract",
+      hasCode: true,
+      description: contractFiles.evmBridgeContract.trim(),
+    },
+  ];
+
   const depositSteps: Step[] = [
     {
       title: 'Select & Connect',
@@ -218,41 +278,140 @@ export const BridgeExplainer = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      <DocSection elevation={0}>
-        <DocTitle variant="h1">
-          Bridge Documentation
-        </DocTitle>
-        <DocSubtitle>
-          Learn how to bridge your tokens between networks securely and efficiently. Follow these step-by-step guides for depositing and withdrawing your assets.
-        </DocSubtitle>
-
-        <Box sx={{ mb: 8 }}>
-          <SectionTitle variant="h2">
-            Deposit Process
-            <ArrowDownwardIcon color="primary" />
-          </SectionTitle>
-          {depositSteps.map((step, index) => (
-            <StepContainer key={index} sx={{ display: 'flex', mb: 4 }}>
-              <StepNumber>{index + 1}</StepNumber>
-              <StepContent step={step} index={index} />
-            </StepContainer>
-          ))}
+    <Container maxWidth="lg" sx={{ py: 6, display: 'flex', width: '100%', maxWidth: '100% !important' }}>
+      <Box sx={{ width: '20%', pr: 4, position: 'sticky', top: '20px', alignSelf: 'flex-start' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          Table of Contents
+        </Typography>
+        <Box component="ul" sx={{ listStyle: 'none', pl: 0 }}>
+          <li>
+            <a
+              href="#about-the-bridge"
+              style={{
+                textDecoration: 'none',
+                color: themeConstants.colors.text.primary,
+              }}
+            >
+              About the Bridge
+            </a>
+            <ul>
+              {aboutTheBridgeInfoSteps.map((step, index) => (
+                <li key={index} style={{ marginTop: '4px' }}>
+                  <a
+                    href={`#about-the-bridge-step-${index}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: activeSection === `about-the-bridge-step-${index}` ? themeConstants.colors.primary.main : themeConstants.colors.text.secondary,
+                    }}
+                  >
+                    {step.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li style={{ marginTop: '10px' }}>
+            <a
+              href="#deposit-process"
+              style={{
+                textDecoration: 'none',
+                color: themeConstants.colors.text.primary,
+              }}
+            >
+              Deposit Process
+            </a>
+            <ul>
+              {depositSteps.map((step, index) => (
+                <li key={index} style={{ marginTop: '4px' }}>
+                  <a
+                    href={`#deposit-step-${index}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: activeSection === `deposit-step-${index}` ? themeConstants.colors.primary.main : themeConstants.colors.text.secondary,
+                    }}
+                  >
+                    {step.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li style={{ marginTop: '10px' }}>
+            <a
+              href="#withdraw-process"
+              style={{
+                textDecoration: 'none',
+                color: themeConstants.colors.text.primary,
+              }}
+            >
+              Withdraw Process
+            </a>
+            <ul>
+              {withdrawSteps.map((step, index) => (
+                <li key={index} style={{ marginTop: '4px' }}>
+                  <a
+                    href={`#withdraw-step-${index}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: activeSection === `withdraw-step-${index}` ? themeConstants.colors.primary.main : themeConstants.colors.text.secondary,
+                    }}
+                  >
+                    {step.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
         </Box>
+      </Box>
 
-        <Box>
-          <SectionTitle variant="h2">
-            Withdraw Process
-            <ArrowDownwardIcon color="primary" />
-          </SectionTitle>
-          {withdrawSteps.map((step, index) => (
-            <StepContainer key={index} sx={{ display: 'flex', mb: 4 }}>
-              <StepNumber>{index + 1}</StepNumber>
-              <StepContent step={step} index={index} />
-            </StepContainer>
-          ))}
-        </Box>
-      </DocSection>
+      <Box sx={{ width: '80%', px: 0, mx: 0 }}>
+        <DocSection elevation={0}>
+          <DocTitle variant="h1">
+            Bridge Documentation
+          </DocTitle>
+          <DocSubtitle>
+            The bridge is non custodian in nature with a set of co-signers to ensure security. The only power the co-signers have is approve the entry or exit of the bridge.
+            The exact scheme is not finalised it but it's will be a multi-sig format. for example: 4 of 7. This means that atleast 4 of the 7 co-signers need to approve the entry or exit of the bridge.
+            On both sides of the bridge, the co-signers can be different to increase security.
+            Learn how to bridge your tokens between networks securely and efficiently. Follow these step-by-step guides for depositing and withdrawing your assets.
+          </DocSubtitle>
+
+          <section id="about-the-bridge">
+            {aboutTheBridgeInfoSteps.map((step, index) => (
+              <Box id={`about-the-bridge-step-${index}`} sx={{ mb: 4 }}>
+                <StepContent step={step} index={index} />
+              </Box>
+            ))}
+          </section>
+
+          <section id="deposit-process">
+            <SectionTitle variant="h2">
+              Deposit Process
+              <ArrowDownwardIcon color="primary" />
+            </SectionTitle>
+            {depositSteps.map((step, index) => (
+              <StepContainer key={index} sx={{ display: 'flex', mb: 4 }} id={`deposit-step-${index}`}>
+                <StepNumber>{index + 1}</StepNumber>
+                <StepContent step={step} index={index} />
+              </StepContainer>
+            ))}
+          </section>
+
+          <section id="withdraw-process">
+            <SectionTitle variant="h2">
+              Withdraw Process
+              <ArrowDownwardIcon color="primary" />
+            </SectionTitle>
+            {withdrawSteps.map((step, index) => (
+              <StepContainer key={index} sx={{ display: 'flex', mb: 4 }} id={`withdraw-step-${index}`}>
+                <StepNumber>{index + 1}</StepNumber>
+                <StepContent step={step} index={index} />
+              </StepContainer>
+            ))}
+          </section>
+        </DocSection>
+      </Box>
     </Container>
   );
 }; 
