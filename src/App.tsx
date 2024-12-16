@@ -7,7 +7,7 @@ import { BCHWallet } from './components/wallet/BCHWallet';
 import { TokenBalance } from './components/balance/TokenBalance';
 import { BridgeExplainer } from './components/bridge/BridgeExplainer';
 import { ContractExplainer } from './components/bridge/ContractExplainer';
-import { TopNavBar } from './components/TopNavBar';
+import TopNavBar from './components/TopNavBar';
 import TokenSelector from './components/TokenSelector';
 import Transactions from './components/bridge/transactions/Transactions';
 import { SUPPORTED_TOKENS } from './config/tokens';
@@ -107,10 +107,7 @@ export const App = () => {
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <TopNavBar
-        onOpenExplainer={() => setOpenExplainer(true)}
-        onOpenContractExplainer={() => setOpenContractExplainer(true)}
-      />
+      <TopNavBar />
 
       <Container maxWidth="lg" sx={{ pt: 6 }}>
         <Box

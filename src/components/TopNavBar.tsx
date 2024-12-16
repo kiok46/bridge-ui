@@ -1,55 +1,55 @@
+import React from 'react';
 import { Box, Button } from '@mui/material';
 
-interface TopNavBarProps {
-  onOpenExplainer: () => void;
-  onOpenContractExplainer: () => void;
-}
-
-export const TopNavBar = ({ onOpenExplainer, onOpenContractExplainer }: TopNavBarProps) => {
+const TopNavBar = () => {
   return (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '1rem',
+        padding: '1rem 2rem',
         backgroundColor: 'rgba(31, 34, 44, 0.8)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}
     >
-      <Button
-        variant="text"
-        onClick={onOpenExplainer}
-        sx={{
-          color: '#B6509E',
-          fontWeight: 'bold',
-          textDecoration: 'none',
-          '&:hover': {
-            backgroundColor: 'transparent',
-            textDecoration: 'underline',
-            color: '#2EBAC6',
-          },
-          marginRight: '1rem',
-        }}
-      >
-        How does it work?
-      </Button>
-      <Button
-        variant="text"
-        onClick={onOpenContractExplainer}
-        sx={{
-          color: '#B6509E',
-          fontWeight: 'bold',
-          textDecoration: 'none',
-          '&:hover': {
-            backgroundColor: 'transparent',
-            textDecoration: 'underline',
-            color: '#2EBAC6',
-          },
-        }}
-      >
-        Contracts
-      </Button>
+      <Box>
+        <Button
+          href="/"
+          sx={{
+            color: '#B6509E',
+            fontWeight: 'bold',
+            textDecoration: 'none',
+            '&:hover': {
+              backgroundColor: 'transparent',
+              textDecoration: 'underline',
+              color: '#2EBAC6',
+            },
+          }}
+        >
+          Home
+        </Button>
+      </Box>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Button
+          href="/how-it-works"
+          target="_blank"
+          sx={{
+            color: '#B6509E',
+            fontWeight: 'bold',
+            textDecoration: 'none',
+            '&:hover': {
+              backgroundColor: 'transparent',
+              textDecoration: 'underline',
+              color: '#2EBAC6',
+            },
+          }}
+        >
+          How It Works
+        </Button>
+      </Box>
     </Box>
   );
-}; 
+};
+
+export default TopNavBar; 
