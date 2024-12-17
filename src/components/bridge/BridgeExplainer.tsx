@@ -7,7 +7,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { themeConstants } from '../../theme/constants';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { contractFiles } from '../../contracts/files';
+import { codeFiles } from '../../contracts/files';
 
 const DocSection = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -92,23 +92,22 @@ const StepContent = ({ step, index }: { step: Step; index: number }) => {
       <StepTitle variant="h3">
         {step.title}
       </StepTitle>
-      {step.hasCode ? (
+      <StepDescription variant="body1">
+        {step.description}
+      </StepDescription>
+      {step.steps && (
+        <ul style={{ color: themeConstants.colors.text.secondary, fontSize: '0.875rem', lineHeight: 1.7, marginTop: '16px', marginBottom: '16px' }}>
+          {step.steps.map((substep, idx) => (
+            <li key={idx}>{substep}</li>
+          ))}
+        </ul>
+      )}
+      {step.code ? (
         <SyntaxHighlighter language="solidity" style={solarizedlight}>
-          {step.description}
+          {step.code}
         </SyntaxHighlighter>
       ) : (
-        <StepDescription variant="body1">
-          {step.description}
-        </StepDescription>
-      )}
-      
-      {step.warning && (
-        <WarningBox>
-          <WarningIcon sx={{ color: themeConstants.colors.error.main }} />
-          <Typography variant="body2" sx={{ color: themeConstants.colors.error.main }}>
-            {step.warning}
-          </Typography>
-        </WarningBox>
+       <div></div>
       )}
       
       {step.info && (
@@ -119,6 +118,16 @@ const StepContent = ({ step, index }: { step: Step; index: number }) => {
           </Typography>
         </InfoBox>
       )}
+
+      {step.warning && (
+        <WarningBox>
+          <WarningIcon sx={{ color: themeConstants.colors.error.main }} />
+          <Typography variant="body2" sx={{ color: themeConstants.colors.error.main }}>
+            {step.warning}
+          </Typography>
+        </WarningBox>
+      )}
+      
     </Box>
   );
 };
@@ -158,10 +167,11 @@ const WarningBox = styled(Box)(({ theme }) => ({
 
 interface Step {
   title: string;
-  description: string;
+  description?: string;
+  steps?: string[];
   info?: string;
   warning?: string;
-  hasCode?: boolean;
+  code?: string;
 }
 
 export const BridgeExplainer = () => {
@@ -190,42 +200,64 @@ export const BridgeExplainer = () => {
 
   const aboutTheBridgeInfoSteps: Step[] = [
     {
-      title: "What is the bridge?",
-      hasCode: false,
-      description: "The bridge is a non custodian bridge that allows you to bridge your tokens between the Ethereum and Bitcoin Cash networks. It is a multi-sig bridge with a set of co-signers to ensure security. The only power the co-signers have is approve the entry or exit of the bridge. The exact scheme is not finalised it but it's will be a multi-sig format. for example: 4 of 7. This means that atleast 4 of the 7 co-signers need to approve the entry or exit of the bridge. On both sides of the bridge, the co-signers can be different to increase security.",
+      title: "Representation of Bridged Tokens on BCH",
+      description: `Each newly supported token on the bridge needs to follow the same steps mentioned below.`,
+      steps: [
+        "Token Creation: A new category is created with max supply for a newly supported token, metadata is added and the entire amount is transferred to the contract as the 0th output of the transaction.",
+        "AuthHead and Reserve Supply: Same UTXO acts as the AuthHead as well as Reserve Supply and never leaves the Contract.",
+      ]
     },
     {
-      title: "Multi-sig Bridge",
-      hasCode: false,
-      description: "4 of 7",
+      title: "Lookup of BCH tokens on EVM",
+      description: `The BCH tokenCategory is mapped to the EVM tokenAddress on the EVM side.`,
+      steps: [
+        "It would require 3 of 5 co-signers to approve addition or removal of any BCH tokenCategory to EVM tokenAddress mapping on the EVM side.",
+      ]
     },
     {
-      title: "BCH Issuer Contract",
-      hasCode: true,
-      description: contractFiles.bchIssuerContract.trim(),
+      title: "Co-Signers",
+      description: `The Bridge on both sides has a set number of co-signers responsible for approving the entry or exit of the bridge.`,
+      steps: [
+        "BCH to EVM: 3 of 5 MultiSig (Not finalised)",
+        "EVM to BCH: 3 of 5 MultiSig (Not finalised)",
+      ]
     },
     {
-      title: "BCH Bridge Contract",
-      hasCode: true,
-      description: contractFiles.bchBridgeContract.trim(),
+      title: "Deposit: EVM to BCH",
+      description: ``,
+      steps: [
+        `The User transfers the token to the Bridge Contract on the EVM chain using the 'Deposit' function.
+          The function has calldata attached which contains the Bitcoin Cash Address. The contract does a lookup for the BCH token category using the address of the token transferred to the contract, this category is used as part of the Deposit Event.
+          `,
+        "The co-signers subscribe to all the events from the EVM bridge contract, construct the transaction(Check the Transaction Structure below)",
+        "The co-signers use an API to provide their signatures for the approval to the party managing the bridge UI",
+        "Once enough signatures are collected, the user can sign and broadcast the transaction and get the tokens on the BCH network.",
+      ],
+      code: codeFiles.depositDescription.trim(),
+      info: "The address(0) is considered the native token of the EVM chain"
     },
     {
-      title: "EVM Bridge Contract",
-      hasCode: true,
-      description: contractFiles.evmBridgeContract.trim(),
+      title: "Withdraw: BCH to EVM",
+      description: "",
+      steps: [
+        "The User makes a token transaction transferring the tokens back to the bridge contract on the BCH network increasing it's reserve supply. (Check the Transaction Structure below)",
+        "The co-signers subscribe to all the events from the BCH bridge contract address and sign the following (trasactionHash + chainId)",
+        "Once enough signatures are collected, the user can broadcast the transaction on the Bridge Contract on the respective EVM chain and get the tokens.",
+      ],
+      code: codeFiles.withdrawDescription.trim(),
     },
   ];
 
   const depositSteps: Step[] = [
     {
-      title: 'Select & Connect',
-      description: 'Select the asset you wish to bridge to the BCH Blockchain. Connect to the source EVM chain.',
-      info: 'Make sure you have enough native tokens (ETH, BNB, etc.) in your wallet to cover gas fees'
+      title: 'Connect & Select',
+      description: 'Select the asset you wish to bridge to the BCH Blockchain. Connect to the source EVM chain along with the BCH network. The Interface helps you to connect with both chains using different wallets at the same time.',
+      info: 'The connected BCH address will be used as the calldata for the deposit transaction',
+      warning: 'If an Incorrect address is provided the funds will be lost forever'
     },
     {
       title: 'Enter Amount',
-      description: 'Specify the amount of Token you wish to bridge. Ensure the amount is between 1 and 10000. Additionally, provide your BCH address where the bridged tokens will be sent.',
-      warning: 'Double-check your BCH address before proceeding. Using the same address for claiming tokens later will make the process smoother.'
+      description: 'Specify the amount of Token you wish to bridge to the BCH blockchain'
     },
     {
       title: 'Approve Token',
@@ -235,45 +267,43 @@ export const BridgeExplainer = () => {
     {
       title: 'Send Token to the Bridge',
       description: 'Initiate the bridging process by moving your Token to the bridge contract on the selected network.',
+      code: codeFiles.depositCallCode.trim(),
       warning: 'Ensure you have enough ETH for gas fees before proceeding'
     },
     {
       title: 'Waiting for Approval',
-      description: 'Once the bridging transaction is confirmed, a claimNFT will be issued to your provided BCH address.',
-      info: 'The waiting period is necessary for security purposes and typically takes a few minutes'
+      description: 'As soon as the transaction is broadcasted, all the co-signers will become aware of the transaction. The co-signers will be using an API to provide their signatures of approval',
     },
     {
-      title: 'Connect to BCH Wallet',
-      description: 'Switch to the Bitcoin Cash network using your wallet.',
-      info: 'Make sure you have a BCH wallet set up and ready to use'
-    },
-    {
-      title: 'Claim wrapped token',
-      description: 'Claim your wrapped token on the Bitcoin Cash network using the claimNFT.',
-      warning: 'Keep your claimNFT safe - you will need it to receive your tokens'
+      title: 'Claim token',
+      description: 'As soon as the min number of signatures required are collected the user can Broadcast the transaction.',
+      info: 'The UI will provide you the all the information required to claim the tokens'
     }
   ];
 
   const withdrawSteps: Step[] = [
     {
-      title: 'Transfer to Bridge Contract',
-      description: 'Specify the amount of wrapped token you wish to withdraw.',
-      warning: 'Ensure the amount is between 1 and 10000'
+      title: 'Connect & Select',
+      description: 'Select the asset you wish to bridge to the EVM Blockchain. Connect to the source EVM chain along with the BCH network. The Interface helps you to connect with both chains using different wallets at the same time.',
+      info: 'The connected EVM address and chainId will be used in the OP_RETURN for the withdraw transaction',
     },
     {
-      title: 'Start Exit',
-      description: 'Start the exit process by moving your wrapped Token to the bridge contract.',
-      info: 'Make sure you have enough BCH for transaction fees'
+      title: 'Enter amount',
+      description: 'Specify the amount of token you wish to withdraw.',
+      warning: 'If the amount of token on the target blockchain is less than the amount of token you wish to withdraw, your withdraw process will be stuck and you will have to wait for the contract to have enough tokens'
+    },
+    {
+      title: 'Sign and Broadcast',
+      description: 'Sign and broadcast the transaction and wait for the approval',
     },
     {
       title: 'Waiting for Approval',
-      description: 'Once the exit transaction is confirmed, you will need to wait for a specified period.',
-      info: 'The waiting period helps ensure the security of your transaction'
+      description: 'As soon as the transaction is broadcasted, all the co-signers will become aware of the transaction. The co-signers will be using an API to provide their signatures of approval',
     },
     {
-      title: 'Process Exit',
-      description: 'Claim your Token on the selected network.',
-      warning: 'Keep your exit transaction hash safe - you will need it to complete the process'
+      title: 'Claim Token',
+      description: 'As soon as the min number of signatures required are collected the user can Broadcast the transaction.',
+      info: 'The UI will provide you the all the information required to claim the tokens'
     }
   ];
 
@@ -371,10 +401,7 @@ export const BridgeExplainer = () => {
             Bridge Documentation
           </DocTitle>
           <DocSubtitle>
-            The bridge is non custodian in nature with a set of co-signers to ensure security. The only power the co-signers have is approve the entry or exit of the bridge.
-            The exact scheme is not finalised it but it's will be a multi-sig format. for example: 4 of 7. This means that atleast 4 of the 7 co-signers need to approve the entry or exit of the bridge.
-            On both sides of the bridge, the co-signers can be different to increase security.
-            Learn how to bridge your tokens between networks securely and efficiently. Follow these step-by-step guides for depositing and withdrawing your assets.
+            This bridge enables seamless token transfers between EVM networks and the Bitcoin Cash blockchain. The detailed instructions and processes for both deposits and withdrawals are provided below. Please read through each section carefully to understand the complete flow of bridging tokens between chains. Important information about security measures, transaction verification, co-signers and expected processing times are included in the step-by-step guides.
           </DocSubtitle>
 
           <section id="about-the-bridge">
