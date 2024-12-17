@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:4000/v1/bridge';
+const API_BASE_URL = process?.env?.API_BASE_URL || 'http://localhost:4000/v1/bridge';
 
 export const fetchTransactions = async (evmAddress: string, bchAddress: string) => {
   const [evmResponse, bchResponse] = await Promise.all([

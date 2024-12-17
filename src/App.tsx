@@ -11,6 +11,7 @@ import TokenSelector from './components/TokenSelector';
 import Transactions from './components/bridge/transactions/Transactions';
 import { SUPPORTED_TOKENS } from './config/tokens';
 import { BridgeDirection } from './components/bridge/BridgeDirection';
+import Warning from '@mui/icons-material/Warning';
 
 
 const defaultTransaction: Transaction = {
@@ -98,6 +99,23 @@ export const App = () => {
 
   return (
       <Container maxWidth="lg" sx={{ pt: 6 }}>
+        <Box
+          sx={{
+            borderRadius: '12px',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+            border: '1px solid rgba(255, 193, 7, 0.3)',
+            p: 2,
+            mb: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2
+          }}
+        >
+          <Warning sx={{ color: 'warning.main' }} />
+          <Typography color="warning.main">
+            This bridge is currently in development and not live yet. Please check back later.
+          </Typography>
+        </Box>
         <Box
           sx={{
             borderRadius: '24px',
